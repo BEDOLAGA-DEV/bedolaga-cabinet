@@ -69,7 +69,8 @@ export default function RenewSubscription() {
 
   const renewMutation = useMutation({
     retry: false,
-    mutationFn: (periodDays: number) => subscriptionApi.renewSubscription(periodDays, subId),
+    mutationFn: (periodDays: number) =>
+      subscriptionApi.renewSubscription(periodDays, subId, subscription?.end_date),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription', subId] });
       queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });

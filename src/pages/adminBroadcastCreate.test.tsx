@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PlatformProvider } from '@/platform/PlatformProvider';
+// Load the page during collection: cold module transformation is not part of a UI assertion.
+import AdminBroadcastCreate from './AdminBroadcastCreate';
 
 /**
  * Email-рассылка по промогруппе и одному человеку (issue бота #3271): раньше были
@@ -66,7 +68,6 @@ beforeEach(() => {
 afterEach(cleanup);
 
 async function renderPage(entry: string | { pathname: string; search: string; state: unknown }) {
-  const AdminBroadcastCreate = (await import('./AdminBroadcastCreate')).default;
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>

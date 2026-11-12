@@ -922,7 +922,6 @@
       "refresh": "Refresh",
       "error": "Could not set up autopay. Check your selection and retry. If your request was already sent, retrying returns the same payment.",
       "cancelError": "Cancellation has not been confirmed. Refresh the status or try again.",
-      "setup": "Enable autopay",
       "period": "Payment period",
       "state": {
         "none": "Autopay is not enabled.",
@@ -9152,6 +9151,7 @@
     "unexpected": "An unexpected error occurred"
   },
   "apiErrors": {
+    "trafficPurchaseNotApplied": "Traffic purchase was not applied. No funds were charged. Please try again.",
     "emailRegistered": "This email is already registered",
     "invalidCredentials": "Invalid email or password",
     "verifyEmail": "Please verify your email first",

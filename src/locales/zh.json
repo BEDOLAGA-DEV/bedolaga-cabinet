@@ -856,7 +856,6 @@
       "refresh": "刷新",
       "error": "无法设置自动付款。请检查所选条件后重试。已提交的请求重试时会返回同一笔付款。",
       "cancelError": "取消尚未确认。请刷新状态或重试。",
-      "setup": "开启自动付款",
       "period": "付款周期",
       "state": {
         "none": "未开启自动付款。",
@@ -9024,6 +9023,7 @@
     "unexpected": "发生了意外错误"
   },
   "apiErrors": {
+    "trafficPurchaseNotApplied": "流量未添加，未扣除任何费用。请重试。",
     "emailRegistered": "此邮箱已注册",
     "invalidCredentials": "邮箱或密码错误",
     "verifyEmail": "请先验证邮箱",
