@@ -1,3 +1,4 @@
+import SplitTrafficSummary from '@/components/subscription/SplitTrafficSummary';
 import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
 import ManagedTrafficSummary from '@/components/subscription/ManagedTrafficSummary';
@@ -195,16 +196,26 @@ export default function DashboardLite() {
           </h1>
           {subscription && (
             <div className="mt-7">
-              {hasUnknownManagedTraffic(subscription) ? (
-                <div className="h-9" aria-hidden="true" />
-              ) : (
-                <LiteMeter
-                  usedGb={subscription.traffic_used_gb}
-                  limitGb={subscription.traffic_limit_gb}
-                  usedPercent={subscription.traffic_used_percent}
+              {subscription.traffic_accounting_mode === 'split' ||
+              subscription.traffic_accounting_mode === 'split_pending' ? (
+                <SplitTrafficSummary
+                  subscriptionId={subscription.id}
+                  mode={subscription.traffic_accounting_mode}
                 />
+              ) : (
+                <>
+                  {hasUnknownManagedTraffic(subscription) ? (
+                    <div className="h-9" aria-hidden="true" />
+                  ) : (
+                    <LiteMeter
+                      usedGb={subscription.traffic_used_gb}
+                      limitGb={subscription.traffic_limit_gb}
+                      usedPercent={subscription.traffic_used_percent}
+                    />
+                  )}
+                  <ManagedTrafficSummary subscription={subscription} />
+                </>
               )}
-              <ManagedTrafficSummary subscription={subscription} />
             </div>
           )}
         </section>

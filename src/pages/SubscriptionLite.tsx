@@ -1,3 +1,4 @@
+import SplitTrafficSummary from '@/components/subscription/SplitTrafficSummary';
 import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
 import ManagedTrafficSummary from '@/components/subscription/ManagedTrafficSummary';
 import { useEffect, useMemo, useState } from 'react';
@@ -185,16 +186,26 @@ export default function SubscriptionLite() {
             : t('lite.status.active', { date: formatLiteDate(subscription.end_date) })}
         </p>
         <div className="mt-7">
-          {hasUnknownManagedTraffic(subscription) ? (
-            <div className="h-9" aria-hidden="true" />
-          ) : (
-            <LiteMeter
-              usedGb={subscription.traffic_used_gb}
-              limitGb={subscription.traffic_limit_gb}
-              usedPercent={subscription.traffic_used_percent}
+          {subscription.traffic_accounting_mode === 'split' ||
+          subscription.traffic_accounting_mode === 'split_pending' ? (
+            <SplitTrafficSummary
+              subscriptionId={subscription.id}
+              mode={subscription.traffic_accounting_mode}
             />
+          ) : (
+            <>
+              {hasUnknownManagedTraffic(subscription) ? (
+                <div className="h-9" aria-hidden="true" />
+              ) : (
+                <LiteMeter
+                  usedGb={subscription.traffic_used_gb}
+                  limitGb={subscription.traffic_limit_gb}
+                  usedPercent={subscription.traffic_used_percent}
+                />
+              )}
+              <ManagedTrafficSummary subscription={subscription} />
+            </>
           )}
-          <ManagedTrafficSummary subscription={subscription} />
         </div>
       </section>
 
@@ -238,24 +249,28 @@ export default function SubscriptionLite() {
             />
           )}
 
-          {panel === 'traffic' ? (
-            <div className="py-4">
-              <TrafficTopupSheet
-                {...sheetProps}
-                selectedTrafficPackage={trafficPackage}
-                onSelectedTrafficPackageChange={setTrafficPackage}
-              />
-            </div>
-          ) : (
-            showsAddons &&
-            subscription.traffic_limit_gb > 0 && (
-              <LiteRow
-                label={t('lite.rows.buyTraffic', 'Докупить трафик')}
-                onClick={() => setPanel('traffic')}
-              />
-            )
-          )}
-
+          {subscription.traffic_accounting_mode !== 'split' &&
+            subscription.traffic_accounting_mode !== 'split_pending' && (
+              <>
+                {panel === 'traffic' ? (
+                  <div className="py-4">
+                    <TrafficTopupSheet
+                      {...sheetProps}
+                      selectedTrafficPackage={trafficPackage}
+                      onSelectedTrafficPackageChange={setTrafficPackage}
+                    />
+                  </div>
+                ) : (
+                  showsAddons &&
+                  subscription.traffic_limit_gb > 0 && (
+                    <LiteRow
+                      label={t('lite.rows.buyTraffic', 'Докупить трафик')}
+                      onClick={() => setPanel('traffic')}
+                    />
+                  )
+                )}
+              </>
+            )}
           {panel === 'devices' ? (
             <div className="py-4">
               <DeviceTopupSheet

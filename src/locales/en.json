@@ -960,7 +960,36 @@
         "missingSubscription": "Subscription not found. Refresh and select it again.",
         "selectSubscription": "Select the subscription you want to set up automatic payments for first."
       }
-    }
+    },
+    "splitTraffic": {
+      "title": "Traffic remaining",
+      "ordinary": "Standard traffic",
+      "bs": "Bypass traffic",
+      "unlimited": "Unlimited",
+      "disabled": "Not included",
+      "transition": "Separate traffic accounting is being set up",
+      "error": "Could not load balances. Please refresh.",
+      "pending": "Some usage is being checked. It has not been deducted from the balance yet.",
+      "updating": "Updating…",
+      "review": "Usage data is being checked. The balance may be adjusted."
+    },
+    "splitPurchase": {
+      "storageUnavailable": "Your browser could not save the payment confirmation. Allow this site to store data, then try again.",
+      "title": "Add traffic",
+      "select": "Choose a package",
+      "quote": "Get price",
+      "confirm": "Buy with balance",
+      "check": "Check purchase",
+      "processing": "Checking purchase…",
+      "duration": "The package lasts 30 days. Access requires an active subscription.",
+      "balance": "Balance shortfall:",
+      "success": "Package added.",
+      "pending": "Payment received. Package activation is still in progress.",
+      "quoteError": "Could not obtain the current price. Select a package and try again.",
+      "retry": "The purchase result is not yet known. Use Check purchase to retry without another charge."
+    },
+    "splitRenewalPending": "Your renewal is paid and saved. Settings are still being applied. No further payment is needed.",
+    "splitRenewalConfirmation": "Saved confirmation: {{days}} days, {{amount}}. Retrying uses this same amount."
   },
   "balance": {
     "paymentEmail": "Payment email",
@@ -4547,7 +4576,9 @@
         "Dpichecker Request Timeout": "DPI//CHECKER — Request timeout",
         "Dpichecker Reference Subscription": "DPI//CHECKER — Reference subscription",
         "Proxy Url": "Proxy URL",
-        "Telegram Api Url": "Telegram API URL"
+        "Telegram Api Url": "Telegram API URL",
+        "Bs Traffic Force Disconnect Enabled": "Force connection termination",
+        "Bs Traffic Uncertain Write Off Enabled": "Leave uncertain traffic uncharged"
       },
       "offlineConv": "Offline Conversions",
       "apiKey": "API Key",
@@ -5196,6 +5227,7 @@
       "dailyDeductionDesc": "Charged daily from user's balance",
       "dailyPriceRequired": "Enter a price per day greater than 0",
       "cannotSave": "Cannot save tariff:",
+      "editConflict": "This plan was changed in another window or by another administrator. Your changes have not been saved. Refresh the page and review the settings before saving again.",
       "statusTitle": "Tariff Status",
       "isActiveLabel": "Active",
       "isActiveHint": "Inactive tariffs are not shown to users",
@@ -5219,7 +5251,33 @@
       "panelTagLabel": "Remnawave panel tag",
       "panelTagDesc": "Up to 16 characters: Latin letters, digits and underscore. Empty — the global tag from settings (trial or paid). The tag shows in the panel which tariff a user is on.",
       "trialDaysLabel": "Trial days on this tariff",
-      "trialDaysDesc": "Empty — the global trial duration setting."
+      "trialDaysDesc": "Empty — the global trial duration setting.",
+      "bs": {
+        "title": "BS traffic",
+        "description": "Separate allowance for allowlist-bypass servers. Ordinary traffic is configured separately.",
+        "configure": "Configure BS traffic",
+        "applicationNote": "Saving these settings alone does not move existing subscriptions to separate accounting.",
+        "limit": "Included allowance, GB",
+        "zero": "0 means unlimited. Unlimited groups do not need top-ups.",
+        "squads": "BS squads",
+        "separate": "Use separate nodes for ordinary and BS traffic. Squads must not overlap.",
+        "noSquads": "Squads have not loaded yet.",
+        "topup": "Allow BS traffic top-ups",
+        "maximum": "Maximum allowance including top-ups, GB (0 means no cap)",
+        "gb": "Size, GB",
+        "price": "Price, ₽",
+        "remove": "Remove",
+        "add": "Add package",
+        "invalid": "Select squads and enter sizes and prices. Package sizes must be unique; ordinary and BS squads must not overlap.",
+        "unavailable": "Unavailable squad",
+        "errors": {
+          "topology": "Ordinary and BS traffic could not be separated. Select nonempty squads on different nodes and check their panel settings.",
+          "configuration": "For separate accounting, enable per-user usage records, disable history cleanup and set the panel’s traffic recording threshold to zero.",
+          "unavailable": "The panel could not be checked. Check the connection and API permissions, then save again.",
+          "binding": "The connection does not match the linked panel. Restore the previous connection settings or migrate existing subscriptions first.",
+          "uncertainPolicy": "Separate accounting requires accepting possible undercounting of uncertain traffic. Review this risk and enable this option in traffic settings."
+        }
+      }
     },
     "servers": {
       "title": "Squad Management",

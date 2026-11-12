@@ -1,3 +1,4 @@
+import SplitTrafficSummary from '@/components/subscription/SplitTrafficSummary';
 import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
 import ManagedTrafficSummary from '@/components/subscription/ManagedTrafficSummary';
 import { uiLocale } from '@/utils/uiLocale';
@@ -21,7 +22,7 @@ interface SubscriptionCardActiveProps {
     traffic_used_gb: number;
     traffic_used_percent: number;
     is_unlimited: boolean;
-    traffic_accounting_mode?: 'legacy' | 'managed';
+    traffic_accounting_mode?: 'legacy' | 'managed' | 'split_pending' | 'split';
     traffic_remaining_gb?: number | null;
     base_traffic_remaining_gb?: number | null;
     next_traffic_refresh_at?: string | null;
@@ -42,8 +43,13 @@ export default function SubscriptionCardActive({
   const { isDark } = useTheme();
   const g = getGlassColors(isDark);
 
+  const splitMode =
+    subscription.traffic_accounting_mode === 'split' ||
+    subscription.traffic_accounting_mode === 'split_pending';
   const unknownTraffic = hasUnknownManagedTraffic(subscription, trafficData);
-  const usedPercent = trafficData?.traffic_used_percent ?? subscription.traffic_used_percent;
+  const usedPercent = splitMode
+    ? 0
+    : (trafficData?.traffic_used_percent ?? subscription.traffic_used_percent);
   const usedGb = trafficData?.traffic_used_gb ?? subscription.traffic_used_gb;
   const isUnlimited = trafficData?.is_unlimited ?? subscription.traffic_limit_gb === 0;
   const zone = useTrafficZone(usedPercent);
@@ -92,7 +98,11 @@ export default function SubscriptionCardActive({
               className="font-mono text-[11px] font-semibold uppercase tracking-widest"
               style={{ color: zone.mainVar, transition: 'color 0.6s ease' }}
             >
-              {isUnlimited ? t('dashboard.unlimited') : t(zone.labelKey)}
+              {splitMode
+                ? t('subscription.traffic')
+                : isUnlimited
+                  ? t('dashboard.unlimited')
+                  : t(zone.labelKey)}
             </span>
             {subscription.is_trial && (
               <span className="inline-flex items-center gap-1 rounded-md border border-accent-400/25 bg-accent-400/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-accent-400">
@@ -109,50 +119,62 @@ export default function SubscriptionCardActive({
         </div>
 
         {/* Big percentage / infinity */}
-        <div className="text-right">
-          {unknownTraffic ? (
-            <span className="text-dark-400">—</span>
-          ) : isUnlimited ? (
-            <>
-              <div
-                className="font-display text-[28px] font-extrabold leading-none tracking-tight"
-                style={{ color: zone.mainVar }}
-              >
-                &#8734;
-              </div>
-              <div className="mt-1 font-mono text-[11px] text-dark-400">
-                {formatTraffic(usedGb)} {t('dashboard.usedSuffix')}
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="font-display text-[38px] font-extrabold leading-none tracking-tight text-dark-50">
-                {animatedPercent.toFixed(0)}
-                <span className="ml-px text-lg font-medium text-dark-400">%</span>
-              </div>
-              <div className="mt-0.5 font-mono text-[11px] text-dark-400">
-                {formatTraffic(usedGb)} / {formatTraffic(subscription.traffic_limit_gb)}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* ─── Progress Bar ─── */}
-      <div className="mb-6">
-        {unknownTraffic ? (
-          <div className="h-8" aria-hidden="true" />
-        ) : (
-          <TrafficProgressBar
-            usedGb={usedGb}
-            limitGb={subscription.traffic_limit_gb}
-            percent={usedPercent}
-            isUnlimited={isUnlimited}
-          />
+        {!splitMode && (
+          <div className="text-right">
+            {unknownTraffic ? (
+              <span className="text-dark-400">—</span>
+            ) : isUnlimited ? (
+              <>
+                <div
+                  className="font-display text-[28px] font-extrabold leading-none tracking-tight"
+                  style={{ color: zone.mainVar }}
+                >
+                  &#8734;
+                </div>
+                <div className="mt-1 font-mono text-[11px] text-dark-400">
+                  {formatTraffic(usedGb)} {t('dashboard.usedSuffix')}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="font-display text-[38px] font-extrabold leading-none tracking-tight text-dark-50">
+                  {animatedPercent.toFixed(0)}
+                  <span className="ml-px text-lg font-medium text-dark-400">%</span>
+                </div>
+                <div className="mt-0.5 font-mono text-[11px] text-dark-400">
+                  {formatTraffic(usedGb)} / {formatTraffic(subscription.traffic_limit_gb)}
+                </div>
+              </>
+            )}
+          </div>
         )}
-        <ManagedTrafficSummary subscription={subscription} refreshed={trafficData} />
       </div>
 
+      {splitMode ? (
+        <div className="mb-6">
+          <SplitTrafficSummary
+            subscriptionId={subscription.id}
+            mode={subscription.traffic_accounting_mode === 'split' ? 'split' : 'split_pending'}
+          />
+        </div>
+      ) : (
+        <>
+          {/* ─── Progress Bar ─── */}
+          <div className="mb-6">
+            {unknownTraffic ? (
+              <div className="h-8" aria-hidden="true" />
+            ) : (
+              <TrafficProgressBar
+                usedGb={usedGb}
+                limitGb={subscription.traffic_limit_gb}
+                percent={usedPercent}
+                isUnlimited={isUnlimited}
+              />
+            )}
+            <ManagedTrafficSummary subscription={subscription} refreshed={trafficData} />
+          </div>
+        </>
+      )}
       {/* ─── Connect Device Button ─── */}
       <ConnectDeviceTile
         subscription={subscription}
@@ -236,17 +258,21 @@ export default function SubscriptionCardActive({
 
       {/* ─── Traffic Refresh ─── */}
       <div className="mb-5 flex items-center justify-between px-0.5">
-        <button
-          onClick={() => refreshTrafficMutation.mutate()}
-          disabled={refreshTrafficMutation.isPending || trafficRefreshCooldown > 0}
-          className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium text-dark-400 transition-colors hover:bg-dark-50/[0.05] hover:text-dark-50/50 disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label={t('common.refresh')}
-        >
-          <RefreshIcon
-            className={`h-3 w-3 ${refreshTrafficMutation.isPending ? 'animate-spin' : ''}`}
-          />
-          {trafficRefreshCooldown > 0 ? `${trafficRefreshCooldown}s` : t('common.refresh')}
-        </button>
+        {!splitMode && (
+          <>
+            <button
+              onClick={() => refreshTrafficMutation.mutate()}
+              disabled={refreshTrafficMutation.isPending || trafficRefreshCooldown > 0}
+              className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium text-dark-400 transition-colors hover:bg-dark-50/[0.05] hover:text-dark-50/50 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label={t('common.refresh')}
+            >
+              <RefreshIcon
+                className={`h-3 w-3 ${refreshTrafficMutation.isPending ? 'animate-spin' : ''}`}
+              />
+              {trafficRefreshCooldown > 0 ? `${trafficRefreshCooldown}s` : t('common.refresh')}
+            </button>
+          </>
+        )}
         <Link
           to={`/subscriptions/${subscription.id}`}
           className="text-[11px] font-medium text-accent-400 transition-colors hover:text-accent-300"

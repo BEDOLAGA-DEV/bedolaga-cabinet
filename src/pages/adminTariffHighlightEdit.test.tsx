@@ -61,6 +61,7 @@ const stored: Partial<TariffDetail> = {
 };
 
 const updated: Record<string, unknown>[] = [];
+let rejectSave = false;
 
 vi.mock('@/api/tariffs', () => ({
   tariffsApi: {
@@ -71,6 +72,8 @@ vi.mock('@/api/tariffs', () => ({
     createTariff: () => Promise.reject(new Error('на правке создания быть не должно')),
     updateTariff: (_id: number, payload: Record<string, unknown>) => {
       updated.push(payload);
+      if (rejectSave)
+        return Promise.reject({ response: { status: 409, data: { detail: 'tariff_changed' } } });
       return Promise.resolve(stored);
     },
   },
@@ -79,8 +82,58 @@ vi.mock('@/api/tariffs', () => ({
 import AdminTariffCreate from './AdminTariffCreate';
 
 afterEach(() => {
+  delete stored.bs_traffic_settings;
+  rejectSave = false;
   updated.length = 0;
   cleanup();
+});
+
+it('preserves separate BS settings when saving an existing tariff', async () => {
+  stored.bs_traffic_settings = {
+    squad_uuids: ['11111111-1111-4111-8111-111111111111'],
+    limit_gb: 10,
+    topup_enabled: true,
+    topup_packages: { '5': 12345 },
+    max_topup_gb: 100,
+  };
+  renderEditPage();
+  await openPeriodsTab();
+  fireEvent.click(screen.getByText(resolveRu('admin.tariffs.tabExtra') as string));
+  const toggle = await screen.findByLabelText(resolveRu('admin.tariffs.bs.configure') as string);
+  fireEvent.click(toggle);
+  fireEvent.click(toggle);
+  const payload = await save();
+  expect(payload.bs_traffic_settings).toEqual({ ...stored.bs_traffic_settings, enabled: true });
+  expect(payload.traffic_topup_packages).toEqual({});
+  expect(payload.traffic_limit_gb).toBe(100);
+});
+
+it('stops BS sales while preserving settings and ordinary traffic', async () => {
+  stored.bs_traffic_settings = {
+    squad_uuids: ['11111111-1111-4111-8111-111111111111'],
+    limit_gb: 0,
+    topup_enabled: false,
+    topup_packages: {},
+    max_topup_gb: 0,
+  };
+  renderEditPage();
+  await openPeriodsTab();
+  fireEvent.click(screen.getByText(resolveRu('admin.tariffs.tabExtra') as string));
+  fireEvent.click(await screen.findByLabelText(resolveRu('admin.tariffs.bs.configure') as string));
+  const payload = await save();
+  expect(payload.bs_traffic_settings).toEqual({ ...stored.bs_traffic_settings, enabled: false });
+  expect(payload.traffic_limit_gb).toBe(100);
+});
+
+it('keeps form input and shows a conflict instead of silently overwriting', async () => {
+  rejectSave = true;
+  renderEditPage();
+  await openPeriodsTab();
+  await save();
+  const alert = await screen.findByRole('alert');
+  expect(alert.textContent).toContain(resolveRu('admin.tariffs.editConflict'));
+  expect(screen.getByDisplayValue('Базовый')).toBeTruthy();
+  expect(updated).toHaveLength(1);
 });
 
 function renderEditPage() {
@@ -144,4 +197,35 @@ it('звёздочка на другом периоде уезжает его д
   const payload = await save();
 
   expect(payload.highlight_period_days).toBe(30);
+});
+
+it('sends the opened tariff version with the form', async () => {
+  stored.edit_version = 'a'.repeat(64);
+  try {
+    renderEditPage();
+    await openPeriodsTab();
+    const payload = await save();
+    expect(payload.expected_version).toBe(stored.edit_version);
+  } finally {
+    delete stored.edit_version;
+  }
+});
+
+it('reopens disabled BS settings off and restores saved terms on enable', async () => {
+  stored.bs_traffic_settings = {
+    enabled: false,
+    squad_uuids: ['11111111-1111-4111-8111-111111111111'],
+    limit_gb: 10,
+    topup_enabled: true,
+    topup_packages: { '5': 12345 },
+    max_topup_gb: 100,
+  };
+  renderEditPage();
+  await openPeriodsTab();
+  fireEvent.click(screen.getByText(resolveRu('admin.tariffs.tabExtra') as string));
+  const toggle = await screen.findByLabelText(resolveRu('admin.tariffs.bs.configure') as string);
+  expect((toggle as HTMLInputElement).checked).toBe(false);
+  fireEvent.click(toggle);
+  const payload = await save();
+  expect(payload.bs_traffic_settings).toEqual({ ...stored.bs_traffic_settings, enabled: true });
 });

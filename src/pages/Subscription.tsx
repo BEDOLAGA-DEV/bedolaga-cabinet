@@ -1,3 +1,4 @@
+import SplitTrafficSummary from '@/components/subscription/SplitTrafficSummary';
 import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
 import ManagedTrafficSummary from '@/components/subscription/ManagedTrafficSummary';
 import { uiLocale } from '@/utils/uiLocale';
@@ -216,17 +217,6 @@ export default function Subscription() {
   // Traffic refresh state
   const [trafficRefreshCooldown, setTrafficRefreshCooldown] = useState(0);
 
-  // Revoke (reissue) cooldown state
-  const [trafficData, setTrafficData] = useState<{
-    traffic_used_gb: number;
-    traffic_used_percent: number;
-    is_unlimited: boolean;
-    traffic_accounting_mode?: 'legacy' | 'managed';
-    traffic_remaining_gb?: number | null;
-    base_traffic_remaining_gb?: number | null;
-    next_traffic_refresh_at?: string | null;
-  } | null>(null);
-
   // Detect multi-tariff mode from cached subscriptions-list
   const { data: multiSubData } = useQuery({
     queryKey: ['subscriptions-list'],
@@ -279,7 +269,11 @@ export default function Subscription() {
     subscription?.hide_subscription_link || connectionLink?.hide_link;
 
   // Traffic zone (theme-aware) — called unconditionally at top level
-  const usedPercent = trafficData?.traffic_used_percent ?? subscription?.traffic_used_percent ?? 0;
+  const usedPercent =
+    subscription?.traffic_accounting_mode === 'split' ||
+    subscription?.traffic_accounting_mode === 'split_pending'
+      ? 0
+      : (subscription?.traffic_used_percent ?? 0);
   const zone = useTrafficZone(usedPercent);
 
   // Purchase options (needed for balance_kopeks in device/traffic/server management)
@@ -322,22 +316,14 @@ export default function Subscription() {
   const refreshTrafficMutation = useMutation({
     mutationFn: () => subscriptionApi.refreshTraffic(subscriptionId),
     onSuccess: (data) => {
-      setTrafficData({
-        traffic_used_gb: data.traffic_used_gb,
-        traffic_used_percent: data.traffic_used_percent,
-        is_unlimited: data.is_unlimited,
-        traffic_accounting_mode: data.traffic_accounting_mode,
-        traffic_remaining_gb: data.traffic_remaining_gb,
-        base_traffic_remaining_gb: data.base_traffic_remaining_gb,
-        next_traffic_refresh_at: data.next_traffic_refresh_at,
-      });
       safeLocal.setItem(`traffic_refresh_ts_${subscriptionId ?? 'default'}`, Date.now().toString());
       if (data.rate_limited && data.retry_after_seconds) {
         setTrafficRefreshCooldown(data.retry_after_seconds);
       } else {
         setTrafficRefreshCooldown(30);
       }
-      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
     },
     onError: (error: {
       response?: { status?: number; headers?: { get?: (key: string) => string } };
@@ -380,6 +366,11 @@ export default function Subscription() {
       return;
     }
 
+    if (
+      subscription.traffic_accounting_mode === 'split' ||
+      subscription.traffic_accounting_mode === 'split_pending'
+    )
+      return;
     refreshTrafficMutation.mutate();
   }, [subscription, refreshTrafficMutation, subscriptionId]);
 
@@ -440,10 +431,12 @@ export default function Subscription() {
       {/* Current Subscription */}
       {subscription ? (
         (() => {
-          const unknownTraffic = hasUnknownManagedTraffic(subscription, trafficData);
-          const usedGb = trafficData?.traffic_used_gb ?? subscription.traffic_used_gb;
-          const isUnlimited =
-            (trafficData?.is_unlimited ?? false) || subscription.traffic_limit_gb === 0;
+          const splitMode =
+            subscription.traffic_accounting_mode === 'split' ||
+            subscription.traffic_accounting_mode === 'split_pending';
+          const unknownTraffic = hasUnknownManagedTraffic(subscription);
+          const usedGb = subscription.traffic_used_gb;
+          const isUnlimited = subscription.traffic_limit_gb === 0;
           const connectedDevices = devicesData?.total ?? 0;
           const isAtDeviceLimit =
             subscription.device_limit > 0 && connectedDevices >= subscription.device_limit;
@@ -490,7 +483,11 @@ export default function Subscription() {
                       className="font-mono text-[11px] font-semibold uppercase tracking-widest"
                       style={{ color: zone.mainHex, transition: 'color 0.6s ease' }}
                     >
-                      {isUnlimited ? t('dashboard.unlimited') : t(zone.labelKey)}
+                      {splitMode
+                        ? t('subscription.traffic')
+                        : isUnlimited
+                          ? t('dashboard.unlimited')
+                          : t(zone.labelKey)}
                     </span>
                   </div>
 
@@ -611,7 +608,13 @@ export default function Subscription() {
                             className="font-mono text-[12px] font-semibold"
                             style={{ color: 'rgb(var(--color-accent-400))' }}
                           >
-                            {subscription.traffic_limit_gb || '∞'} {t('common.units.gb')}
+                            {splitMode ? (
+                              '—'
+                            ) : (
+                              <>
+                                {subscription.traffic_limit_gb || '∞'} {t('common.units.gb')}
+                              </>
+                            )}
                           </span>
                           <span className="text-[11px] text-dark-400">
                             {t('subscription.traffic')}
@@ -638,55 +641,67 @@ export default function Subscription() {
                 </div>
               )}
 
-              {/* ─── Traffic Progress ─── */}
-              <div className="mb-6">
-                <div className="mb-2.5 flex items-center justify-between">
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-dark-400">
-                    {t('subscription.traffic')}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[11px] text-dark-400">
-                      {unknownTraffic
-                        ? '—'
-                        : isUnlimited
-                          ? formatTraffic(usedGb)
-                          : `${formatTraffic(usedGb)} / ${formatTraffic(subscription.traffic_limit_gb)}`}
-                    </span>
-                    <button
-                      onClick={() => refreshTrafficMutation.mutate()}
-                      disabled={refreshTrafficMutation.isPending || trafficRefreshCooldown > 0}
-                      className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-dark-400 transition-colors hover:bg-dark-50/[0.05] hover:text-dark-50/50 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <RefreshIcon
-                        className="h-3 w-3"
-                        spinning={refreshTrafficMutation.isPending}
-                      />
-                      {trafficRefreshCooldown > 0
-                        ? `${trafficRefreshCooldown}s`
-                        : t('common.refresh')}
-                    </button>
-                  </div>
-                </div>
-                {subscription.traffic_reset_mode &&
-                  subscription.traffic_reset_mode !== 'NO_RESET' && (
-                    <div className="mb-2 text-[10px] text-dark-400">
-                      {t(`subscription.trafficReset.${subscription.traffic_reset_mode}`)}
-                    </div>
-                  )}
-                {unknownTraffic ? (
-                  <div className="h-2" aria-hidden="true" />
-                ) : (
-                  <TrafficProgressBar
-                    usedGb={usedGb}
-                    limitGb={subscription.traffic_limit_gb}
-                    percent={usedPercent}
-                    isUnlimited={isUnlimited}
-                    compact
+              {splitMode ? (
+                <div className="mb-6">
+                  <SplitTrafficSummary
+                    subscriptionId={subscription.id}
+                    mode={
+                      subscription.traffic_accounting_mode === 'split' ? 'split' : 'split_pending'
+                    }
                   />
-                )}
-                <ManagedTrafficSummary subscription={subscription} refreshed={trafficData} />
-              </div>
-
+                </div>
+              ) : (
+                <>
+                  {/* ─── Traffic Progress ─── */}
+                  <div className="mb-6">
+                    <div className="mb-2.5 flex items-center justify-between">
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-dark-400">
+                        {t('subscription.traffic')}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-[11px] text-dark-400">
+                          {unknownTraffic
+                            ? '—'
+                            : isUnlimited
+                              ? formatTraffic(usedGb)
+                              : `${formatTraffic(usedGb)} / ${formatTraffic(subscription.traffic_limit_gb)}`}
+                        </span>
+                        <button
+                          onClick={() => refreshTrafficMutation.mutate()}
+                          disabled={refreshTrafficMutation.isPending || trafficRefreshCooldown > 0}
+                          className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-dark-400 transition-colors hover:bg-dark-50/[0.05] hover:text-dark-50/50 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <RefreshIcon
+                            className="h-3 w-3"
+                            spinning={refreshTrafficMutation.isPending}
+                          />
+                          {trafficRefreshCooldown > 0
+                            ? `${trafficRefreshCooldown}s`
+                            : t('common.refresh')}
+                        </button>
+                      </div>
+                    </div>
+                    {subscription.traffic_reset_mode &&
+                      subscription.traffic_reset_mode !== 'NO_RESET' && (
+                        <div className="mb-2 text-[10px] text-dark-400">
+                          {t(`subscription.trafficReset.${subscription.traffic_reset_mode}`)}
+                        </div>
+                      )}
+                    {unknownTraffic ? (
+                      <div className="h-2" aria-hidden="true" />
+                    ) : (
+                      <TrafficProgressBar
+                        usedGb={usedGb}
+                        limitGb={subscription.traffic_limit_gb}
+                        percent={usedPercent}
+                        isUnlimited={isUnlimited}
+                        compact
+                      />
+                    )}
+                    <ManagedTrafficSummary subscription={subscription} />
+                  </div>
+                </>
+              )}
               {/* ─── Connect Device Button ─── */}
               {subscription.subscription_url && (
                 <HoverBorderGradient
@@ -857,88 +872,91 @@ export default function Subscription() {
               )}
 
               {/* ─── Purchased Traffic Packages ─── */}
-              {subscription.traffic_purchases && subscription.traffic_purchases.length > 0 && (
-                <div className="mb-5">
-                  <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-dark-400">
-                    {t('subscription.purchasedTraffic')}
-                  </div>
-                  <div className="space-y-2">
-                    {subscription.traffic_purchases.map((purchase) => (
-                      <div
-                        key={purchase.id}
-                        className="rounded-[12px] p-3"
-                        style={{
-                          background: g.innerBg,
-                          border: `1px solid ${g.innerBorder}`,
-                        }}
-                      >
-                        <div className="mb-2 flex flex-wrap items-start justify-between gap-3">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="flex h-7 w-7 items-center justify-center rounded-[8px]"
-                              style={{ background: `${zone.mainHex}12`, color: zone.mainHex }}
-                            >
-                              <DownloadIcon className="h-3.5 w-3.5" />
+              {!splitMode &&
+                subscription.traffic_purchases &&
+                subscription.traffic_purchases.length > 0 && (
+                  <div className="mb-5">
+                    <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-dark-400">
+                      {t('subscription.purchasedTraffic')}
+                    </div>
+                    <div className="space-y-2">
+                      {subscription.traffic_purchases.map((purchase) => (
+                        <div
+                          key={purchase.id}
+                          className="rounded-[12px] p-3"
+                          style={{
+                            background: g.innerBg,
+                            border: `1px solid ${g.innerBorder}`,
+                          }}
+                        >
+                          <div className="mb-2 flex flex-wrap items-start justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="flex h-7 w-7 items-center justify-center rounded-[8px]"
+                                style={{ background: `${zone.mainHex}12`, color: zone.mainHex }}
+                              >
+                                <DownloadIcon className="h-3.5 w-3.5" />
+                              </div>
+                              <span className="text-sm font-semibold text-dark-50">
+                                {purchase.traffic_gb} {t('common.units.gb')}
+                              </span>
                             </div>
-                            <span className="text-sm font-semibold text-dark-50">
-                              {purchase.traffic_gb} {t('common.units.gb')}
+                            <div className="min-w-0 text-end">
+                              <div
+                                className="text-[11px] font-medium"
+                                style={{
+                                  color:
+                                    purchase.days_remaining === 0 ? '#FF6B35' : g.textSecondary,
+                                }}
+                              >
+                                {purchase.days_remaining === 0
+                                  ? t('subscription.expired')
+                                  : t('subscription.days', { count: purchase.days_remaining })}
+                              </div>
+                              <div className="mt-0.5 font-mono text-[9px] text-dark-400">
+                                {t('subscription.accounting.packageExpires')}:{' '}
+                                {new Date(purchase.expires_at).toLocaleDateString(uiLocale(), {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                })}
+                              </div>
+                            </div>
+                          </div>
+                          {subscription.traffic_accounting_mode === 'managed' &&
+                            typeof purchase.remaining_gb === 'number' &&
+                            Number.isFinite(purchase.remaining_gb) &&
+                            purchase.remaining_gb >= 0 && (
+                              <p className="mb-2 text-sm tabular-nums text-dark-300">
+                                {t('subscription.accounting.packageRemaining', {
+                                  amount: formatTraffic(purchase.remaining_gb),
+                                })}
+                              </p>
+                            )}
+                          <div
+                            className="relative h-1.5 overflow-hidden rounded-full"
+                            style={{ background: g.trackBg }}
+                          >
+                            <div
+                              className="absolute inset-0 origin-left rounded-full bg-accent-500 transition-transform duration-500"
+                              style={{
+                                transform: `scaleX(${purchase.progress_percent / 100})`,
+                              }}
+                            />
+                          </div>
+                          <div className="mt-1 flex justify-between font-mono text-[9px] text-dark-400">
+                            <span>
+                              {new Date(purchase.created_at).toLocaleDateString(uiLocale())}
+                            </span>
+                            <span>
+                              {new Date(purchase.expires_at).toLocaleDateString(uiLocale())}
                             </span>
                           </div>
-                          <div className="min-w-0 text-end">
-                            <div
-                              className="text-[11px] font-medium"
-                              style={{
-                                color: purchase.days_remaining === 0 ? '#FF6B35' : g.textSecondary,
-                              }}
-                            >
-                              {purchase.days_remaining === 0
-                                ? t('subscription.expired')
-                                : t('subscription.days', { count: purchase.days_remaining })}
-                            </div>
-                            <div className="mt-0.5 font-mono text-[9px] text-dark-400">
-                              {t('subscription.accounting.packageExpires')}:{' '}
-                              {new Date(purchase.expires_at).toLocaleDateString(uiLocale(), {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric',
-                              })}
-                            </div>
-                          </div>
                         </div>
-                        {subscription.traffic_accounting_mode === 'managed' &&
-                          typeof purchase.remaining_gb === 'number' &&
-                          Number.isFinite(purchase.remaining_gb) &&
-                          purchase.remaining_gb >= 0 && (
-                            <p className="mb-2 text-sm tabular-nums text-dark-300">
-                              {t('subscription.accounting.packageRemaining', {
-                                amount: formatTraffic(purchase.remaining_gb),
-                              })}
-                            </p>
-                          )}
-                        <div
-                          className="relative h-1.5 overflow-hidden rounded-full"
-                          style={{ background: g.trackBg }}
-                        >
-                          <div
-                            className="absolute inset-0 origin-left rounded-full bg-accent-500 transition-transform duration-500"
-                            style={{
-                              transform: `scaleX(${purchase.progress_percent / 100})`,
-                            }}
-                          />
-                        </div>
-                        <div className="mt-1 flex justify-between font-mono text-[9px] text-dark-400">
-                          <span>
-                            {new Date(purchase.created_at).toLocaleDateString(uiLocale())}
-                          </span>
-                          <span>
-                            {new Date(purchase.expires_at).toLocaleDateString(uiLocale())}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* ─── Autopay Toggle ─── */}
               <AutopayToggle
@@ -1058,21 +1076,23 @@ export default function Subscription() {
           </div>
 
           {/* Buy Traffic */}
-          {subscription.traffic_limit_gb > 0 && (
-            <div className="mt-4">
-              <TrafficTopupSheet
-                open={showTrafficTopup}
-                onOpen={() => setShowTrafficTopup(true)}
-                onClose={() => setShowTrafficTopup(false)}
-                subscription={subscription}
-                subscriptionId={subscriptionId}
-                selectedTrafficPackage={selectedTrafficPackage}
-                onSelectedTrafficPackageChange={setSelectedTrafficPackage}
-                purchaseOptions={purchaseOptions}
-                isDark={isDark}
-              />
-            </div>
-          )}
+          {subscription.traffic_accounting_mode !== 'split' &&
+            subscription.traffic_accounting_mode !== 'split_pending' &&
+            subscription.traffic_limit_gb > 0 && (
+              <div className="mt-4">
+                <TrafficTopupSheet
+                  open={showTrafficTopup}
+                  onOpen={() => setShowTrafficTopup(true)}
+                  onClose={() => setShowTrafficTopup(false)}
+                  subscription={subscription}
+                  subscriptionId={subscriptionId}
+                  selectedTrafficPackage={selectedTrafficPackage}
+                  onSelectedTrafficPackageChange={setSelectedTrafficPackage}
+                  purchaseOptions={purchaseOptions}
+                  isDark={isDark}
+                />
+              </div>
+            )}
 
           {/* Server Management - only in classic mode */}
           {!isTariffsMode && (

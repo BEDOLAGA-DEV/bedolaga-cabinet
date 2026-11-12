@@ -249,8 +249,14 @@ export function TariffPurchaseForm({
       setUncertainCheckout(checkoutRequestSent.current && (status === undefined || status >= 500));
       if (devicePreviewEnabled && status !== undefined && status < 500) deviceQuoteQuery.refetch();
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       setUncertainCheckout(false);
+      if (result.delivery_pending) {
+        // A saved payment is not a ready connection. Reload the persisted
+        // pending state instead of briefly showing old active-account actions.
+        queryClient.removeQueries({ queryKey: ['subscription'] });
+        queryClient.removeQueries({ queryKey: ['subscriptions-list'] });
+      }
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
       queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });

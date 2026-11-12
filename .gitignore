@@ -2,8 +2,8 @@
 node_modules
 node_modules/
 
-# Claude local settings
-.claude/
+# Codex local context and archives
+.codex/
 
 # Build output
 dist/
@@ -47,8 +47,6 @@ miniapp/
 
 # AI & Agents context
 .ai/
-CLAUDE.md
-**/CLAUDE.md
 
 # Impeccable design context (local only, not for shared repo)
 PRODUCT.md

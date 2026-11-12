@@ -158,28 +158,10 @@ export default function Dashboard() {
 
   // Traffic refresh state and mutation
   const [trafficRefreshCooldown, setTrafficRefreshCooldown] = useState(0);
-  const [trafficData, setTrafficData] = useState<{
-    traffic_used_gb: number;
-    traffic_used_percent: number;
-    is_unlimited: boolean;
-    traffic_accounting_mode?: 'legacy' | 'managed';
-    traffic_remaining_gb?: number | null;
-    base_traffic_remaining_gb?: number | null;
-    next_traffic_refresh_at?: string | null;
-  } | null>(null);
 
   const refreshTrafficMutation = useMutation({
     mutationFn: () => subscriptionApi.refreshTraffic(subscription?.id),
     onSuccess: (data) => {
-      setTrafficData({
-        traffic_used_gb: data.traffic_used_gb,
-        traffic_used_percent: data.traffic_used_percent,
-        is_unlimited: data.is_unlimited,
-        traffic_accounting_mode: data.traffic_accounting_mode,
-        traffic_remaining_gb: data.traffic_remaining_gb,
-        base_traffic_remaining_gb: data.base_traffic_remaining_gb,
-        next_traffic_refresh_at: data.next_traffic_refresh_at,
-      });
       safeLocal.setItem(
         `traffic_refresh_ts_${subscription?.id ?? 'default'}`,
         Date.now().toString(),
@@ -189,7 +171,8 @@ export default function Dashboard() {
       } else {
         setTrafficRefreshCooldown(30);
       }
-      queryClient.invalidateQueries({ queryKey: ['subscription', subscription?.id] });
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
     },
     onError: (error: {
       response?: { status?: number; headers?: { get?: (key: string) => string } };
@@ -231,6 +214,11 @@ export default function Dashboard() {
       return;
     }
 
+    if (
+      subscription.traffic_accounting_mode === 'split' ||
+      subscription.traffic_accounting_mode === 'split_pending'
+    )
+      return;
     refreshTrafficMutation.mutate();
   }, [subscription, refreshTrafficMutation]);
 
@@ -406,7 +394,7 @@ export default function Dashboard() {
         ) : subscription ? (
           <SubscriptionCardActive
             subscription={subscription}
-            trafficData={trafficData}
+            trafficData={null}
             refreshTrafficMutation={refreshTrafficMutation}
             trafficRefreshCooldown={trafficRefreshCooldown}
             connectedDevices={devicesData?.total ?? 0}

@@ -12,6 +12,13 @@ import {
   type ExternalSquadInfo,
 } from '../api/tariffs';
 import { AdminBackButton } from '../components/admin';
+import { BsTrafficEditor } from '@/components/admin/BsTrafficEditor';
+import { tariffSaveErrorKey } from '@/components/admin/tariffSaveError';
+import {
+  bsTrafficFormState,
+  parseBsTrafficForm,
+  type BsTrafficFormState,
+} from '@/components/admin/bsTrafficForm';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import Twemoji from '@/lib/twemoji';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
@@ -33,6 +40,7 @@ export default function AdminTariffCreate() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
+  const [editVersion, setEditVersion] = useState<string | undefined>();
   const isEdit = !!id;
 
   // Step: null = type selection, 'period' or 'daily' = form
@@ -63,6 +71,7 @@ export default function AdminTariffCreate() {
 
   // Traffic topup
   const [trafficTopupEnabled, setTrafficTopupEnabled] = useState(false);
+  const [bsTraffic, setBsTraffic] = useState<BsTrafficFormState | null>(null);
   const [maxTopupTrafficGb, setMaxTopupTrafficGb] = useState<number | ''>(0);
   const [trafficTopupPackages, setTrafficTopupPackages] = useState<Record<string, number>>({});
 
@@ -118,6 +127,7 @@ export default function AdminTariffCreate() {
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     select: useCallback((data: TariffDetail) => {
+      setEditVersion(data.edit_version ?? undefined);
       setTariffType(data.is_daily ? 'daily' : 'period');
       setName(data.name);
       setDescription(data.description || '');
@@ -141,6 +151,7 @@ export default function AdminTariffCreate() {
       setTrafficTopupEnabled(data.traffic_topup_enabled || false);
       setMaxTopupTrafficGb(data.max_topup_traffic_gb || 0);
       setTrafficTopupPackages(data.traffic_topup_packages || {});
+      setBsTraffic(bsTrafficFormState(data.bs_traffic_settings));
       setTrafficResetMode(data.traffic_reset_mode || null);
       setShowInGift(data.show_in_gift ?? true);
       setIsTariffHighlighted(data.is_highlighted ?? false);
@@ -168,6 +179,8 @@ export default function AdminTariffCreate() {
   });
 
   const handleSubmit = () => {
+    const bsSettings = parseBsTrafficForm(bsTraffic, selectedSquads);
+    if (bsSettings === undefined) return;
     const isDaily = tariffType === 'daily';
     const highlightPayload = isDaily ? null : highlightPeriodDays;
 
@@ -176,6 +189,7 @@ export default function AdminTariffCreate() {
     // clearing the description or unchecking all promo groups impossible.
     const data: TariffCreateRequest | TariffUpdateRequest = {
       name,
+      bs_traffic_settings: bsSettings,
       description: isEdit ? description : description || undefined,
       is_active: isActive,
       show_in_gift: showInGift,
@@ -209,7 +223,7 @@ export default function AdminTariffCreate() {
     };
 
     if (isEdit) {
-      updateMutation.mutate({ id: Number(id), data });
+      updateMutation.mutate({ id: Number(id), data: { ...data, expected_version: editVersion } });
     } else {
       createMutation.mutate(data as TariffCreateRequest);
     }
@@ -269,7 +283,9 @@ export default function AdminTariffCreate() {
   const isDeviceLimitValid = deviceLimit !== '' && toNumber(deviceLimit) >= 1;
   const isTierLevelValid =
     tierLevel !== '' && toNumber(tierLevel) >= 1 && toNumber(tierLevel) <= 10;
-  const hasTrafficPackages = !trafficTopupEnabled || Object.keys(trafficTopupPackages).length > 0;
+  const hasTrafficPackages =
+    (!trafficTopupEnabled || Object.keys(trafficTopupPackages).length > 0) &&
+    parseBsTrafficForm(bsTraffic, selectedSquads) !== undefined;
   const isValidPeriod =
     isNameValid &&
     isDeviceLimitValid &&
@@ -939,6 +955,12 @@ export default function AdminTariffCreate() {
           </div>
 
           {/* Traffic topup */}
+          <BsTrafficEditor
+            value={bsTraffic}
+            onChange={setBsTraffic}
+            servers={servers}
+            ordinarySquads={selectedSquads}
+          />
           <div className="card space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium text-dark-200">
@@ -1284,6 +1306,11 @@ export default function AdminTariffCreate() {
 
       {/* Footer */}
       <div className="card space-y-3">
+        {(updateMutation.isError || createMutation.isError) && (
+          <p role="alert" className="text-sm break-words text-error-400">
+            {t(tariffSaveErrorKey(updateMutation.error ?? createMutation.error))}
+          </p>
+        )}
         {validationErrors.length > 0 && (
           <div className="rounded-lg border border-error-500/30 bg-error-500/10 p-3">
             <p className="mb-1 text-sm font-medium text-error-400">

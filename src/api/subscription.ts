@@ -1,6 +1,38 @@
 import apiClient from './client';
 import { getYandexCid } from '../utils/yandexCid';
 
+export interface SplitTrafficGroupSummary {
+  mode: 'disabled' | 'finite' | 'unlimited';
+  // Exact decimal bytes; do not coerce to Number before formatting.
+  remaining_bytes: string | null;
+  pending_bytes: string;
+  pending_operations: number;
+  needs_review: boolean;
+}
+
+export interface SplitTrafficSummary {
+  subscription_id: number;
+  // Calculation time, not panel collection freshness or applied access.
+  calculated_at: string;
+  grace_active: boolean;
+  purchase_available?: boolean;
+  purchase_packages?: { group: 'ordinary' | 'bs'; gb: number }[];
+  groups: { ordinary: SplitTrafficGroupSummary; bs: SplitTrafficGroupSummary };
+}
+
+export interface SplitTrafficQuote {
+  subscription_id: number;
+  group: 'ordinary' | 'bs';
+  gb: number;
+  period_days: number;
+  base_price_kopeks: number;
+  price_kopeks: number;
+  discount_percent: number;
+  balance_kopeks: number;
+  missing_kopeks: number;
+  valid_until: string;
+}
+
 export interface TariffDeviceQuote {
   quote_id: string;
   expires_at: string;
@@ -165,15 +197,25 @@ export const subscriptionApi = {
   renewSubscription: async (
     periodDays: number,
     subscriptionId?: number,
+    operationId?: string,
+    expectedPriceKopeks?: number,
   ): Promise<{
     message: string;
     new_end_date: string;
     amount_paid_kopeks: number;
+    delivery_pending?: boolean;
   }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/renew',
       ...bodyWithSubId(
-        { period_days: periodDays, yandex_cid: getYandexCid() || undefined },
+        {
+          period_days: periodDays,
+          yandex_cid: getYandexCid() || undefined,
+          ...(operationId ? { operation_id: operationId } : {}),
+          ...(expectedPriceKopeks !== undefined
+            ? { expected_price_kopeks: expectedPriceKopeks }
+            : {}),
+        },
         subscriptionId,
       ),
     );
@@ -181,6 +223,47 @@ export const subscriptionApi = {
   },
 
   // ── Traffic ─────────────────────────────────────────────────────────
+
+  getSplitTrafficSummary: async (subscriptionId: number): Promise<SplitTrafficSummary> => {
+    const response = await apiClient.get<SplitTrafficSummary>(
+      '/cabinet/subscription/traffic/split-summary',
+      { params: { subscription_id: subscriptionId } },
+    );
+    return response.data;
+  },
+
+  getSplitTrafficQuote: async (
+    subscriptionId: number,
+    group: 'ordinary' | 'bs',
+    gb: number,
+  ): Promise<SplitTrafficQuote> => {
+    const response = await apiClient.post<SplitTrafficQuote>(
+      '/cabinet/subscription/traffic/split-quote',
+      { group, gb },
+      { params: { subscription_id: subscriptionId } },
+    );
+    return response.data;
+  },
+
+  purchaseSplitTraffic: async (
+    subscriptionId: number,
+    request: {
+      group: 'ordinary' | 'bs';
+      gb: number;
+      expected_price_kopeks: number;
+      operation_key: string;
+    },
+  ): Promise<{
+    subscription_id: number;
+    price_kopeks: number;
+    delivery_status: 'verified' | 'pending';
+    replayed: boolean;
+  }> => {
+    const response = await apiClient.post('/cabinet/subscription/traffic/split-purchase', request, {
+      params: { subscription_id: subscriptionId },
+    });
+    return response.data;
+  },
 
   getTrafficPackages: async (subscriptionId?: number): Promise<TrafficPackage[]> => {
     const response = await apiClient.get<TrafficPackage[]>(
@@ -245,7 +328,7 @@ export const subscriptionApi = {
     traffic_limit_gb: number;
     traffic_used_percent: number;
     is_unlimited: boolean;
-    traffic_accounting_mode?: 'legacy' | 'managed';
+    traffic_accounting_mode?: 'legacy' | 'managed' | 'split_pending' | 'split';
     traffic_remaining_gb?: number | null;
     base_traffic_remaining_gb?: number | null;
     next_traffic_refresh_at?: string | null;
@@ -681,6 +764,7 @@ export const subscriptionApi = {
     devices?: { selected_device_limit: number; quote_id: string },
   ): Promise<{
     success: boolean;
+    delivery_pending?: boolean;
     already_processed?: boolean;
     subscription_id?: number | null;
     charged_amount?: number;

@@ -1,4 +1,5 @@
 import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
+import { safeSession } from '@/utils/safeStorage';
 import { isUncertainPurchaseOutcome } from '@/utils/api-error';
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -30,7 +31,26 @@ export default function RenewSubscription() {
   const { formatAmount, currencySymbol } = useCurrency();
   const { impact } = useHaptic();
 
-  const [selectedPeriod, setSelectedPeriod] = useState<number | null>(null);
+  const [confirmedRenewal, setConfirmedRenewal] = useState<{
+    period: number;
+    price: number;
+    delivery_pending?: boolean;
+  } | null>(() => {
+    try {
+      const saved = JSON.parse(safeSession.getItem(`split-renewal:${subId}`) ?? 'null');
+      return saved && Number.isSafeInteger(saved.period) && Number.isSafeInteger(saved.price)
+        ? saved
+        : null;
+    } catch {
+      return null;
+    }
+  });
+  const [selectedPeriod, setSelectedPeriod] = useState<number | null>(
+    confirmedRenewal?.period ?? null,
+  );
+  const [deliveryPending, setDeliveryPending] = useState(
+    confirmedRenewal?.delivery_pending === true,
+  );
   const [error, setError] = useState<string | null>(null);
 
   // Load subscription detail for tariff name
@@ -69,18 +89,58 @@ export default function RenewSubscription() {
 
   const renewMutation = useMutation({
     retry: false,
-    mutationFn: (periodDays: number) => subscriptionApi.renewSubscription(periodDays, subId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription', subId] });
+    mutationFn: (periodDays: number) => {
+      if (subscription?.traffic_accounting_mode !== 'split')
+        return subscriptionApi.renewSubscription(periodDays, subId);
+      const key = `split-renewal:${subId}`;
+      const saved = safeSession.getItem(key);
+      const attempt = saved
+        ? JSON.parse(saved)
+        : {
+            period: periodDays,
+            operation: crypto.randomUUID(),
+            price: options?.find((option) => option.period_days === periodDays)?.price_kopeks,
+          };
+      // Retry the original confirmation even after navigation or a lost response.
+      if (attempt.period !== periodDays || !Number.isSafeInteger(attempt.price))
+        throw new Error(t('subscription.purchaseOutcomeUnknown'));
+      if (!safeSession.setItem(key, JSON.stringify(attempt))) {
+        throw new Error('payment-storage-unavailable');
+      }
+      setConfirmedRenewal(attempt);
+      return subscriptionApi.renewSubscription(periodDays, subId, attempt.operation, attempt.price);
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
       queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
       queryClient.invalidateQueries({ queryKey: ['renewal-options', subId] });
       queryClient.invalidateQueries({ queryKey: ['balance'] });
+      if (result.delivery_pending) {
+        // Keep the paid receipt until delivery is confirmed, including after reload.
+        const key = `split-renewal:${subId}`;
+        const saved = safeSession.getJson<Record<string, unknown> | null>(key, null);
+        if (saved) safeSession.setJson(key, { ...saved, delivery_pending: true });
+        setConfirmedRenewal((previous) => previous && { ...previous, delivery_pending: true });
+        setDeliveryPending(true);
+        return;
+      }
+      safeSession.removeItem(`split-renewal:${subId}`);
+      setConfirmedRenewal(null);
       navigate(`/subscriptions/${subId}`, { replace: true });
     },
     onError: (err: unknown) => {
+      if (err instanceof Error && err.message === 'payment-storage-unavailable') {
+        setError(t('subscription.splitPurchase.storageUnavailable'));
+        return;
+      }
       if (isUncertainPurchaseOutcome(err)) {
         setError(t('subscription.purchaseOutcomeUnknown'));
         return;
+      }
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status && [400, 403, 404, 409, 422].includes(status)) {
+        safeSession.removeItem(`split-renewal:${subId}`);
+        setConfirmedRenewal(null);
       }
       const detail =
         err && typeof err === 'object' && 'response' in err
@@ -179,6 +239,13 @@ export default function RenewSubscription() {
             </Link>
           )}
         </section>
+      ) : confirmedRenewal ? (
+        <p role="status" className="text-sm text-dark-100">
+          {t('subscription.splitRenewalConfirmation', {
+            days: confirmedRenewal.period,
+            amount: `${formatAmount(confirmedRenewal.price / 100)}\u00a0${currencySymbol}`,
+          })}
+        </p>
       ) : !options || options.length === 0 ? (
         <div
           className="rounded-2xl p-6 text-center"
@@ -290,6 +357,14 @@ export default function RenewSubscription() {
         </div>
       )}
 
+      {deliveryPending && (
+        <div role="status" className="space-y-3 text-sm text-dark-100">
+          <p>{t('subscription.splitRenewalPending')}</p>
+          <Link className="btn-secondary block text-center" to={`/subscriptions/${subId}`}>
+            {t('subscription.title')}
+          </Link>
+        </div>
+      )}
       {/* Renew button */}
       {!(subscription?.is_daily && !subscription.is_trial) && selectedPeriod && (
         <button
@@ -299,7 +374,9 @@ export default function RenewSubscription() {
         >
           {renewMutation.isPending
             ? t('common.processing', 'Обработка...')
-            : t('subscription.extend', 'Продлить подписку')}
+            : confirmedRenewal
+              ? t('subscription.splitPurchase.check')
+              : t('subscription.extend', 'Продлить подписку')}
         </button>
       )}
     </div>

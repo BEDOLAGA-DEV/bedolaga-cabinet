@@ -66,7 +66,7 @@ export interface ServerInfo {
 }
 
 export interface TrafficAccountingSummary {
-  traffic_accounting_mode?: 'legacy' | 'managed';
+  traffic_accounting_mode?: 'legacy' | 'managed' | 'split_pending' | 'split';
   traffic_remaining_gb?: number | null;
   base_traffic_remaining_gb?: number | null;
   next_traffic_refresh_at?: string | null;

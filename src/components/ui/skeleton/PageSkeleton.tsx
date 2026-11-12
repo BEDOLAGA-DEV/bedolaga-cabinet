@@ -4,7 +4,7 @@ import { Skeleton, SkeletonGroup } from './Skeleton';
 export type PageSkeletonVariant = 'user' | 'admin';
 
 /**
- * Высота заглушки заголовка по канону CLAUDE.md:
+ * Высота заглушки заголовка по канону AGENTS.md:
  * H1 юзер-страниц — text-2xl/sm:text-3xl, H1 админки — text-xl без скачков.
  */
 const TITLE_HEIGHT: Record<PageSkeletonVariant, string> = {

@@ -266,3 +266,24 @@ it.each([false, true])(
     ).toBe(true);
   },
 );
+
+it('reloads pending enrollment after a saved payment without offering an uncertain retry', async () => {
+  const remove = vi.spyOn(QueryClient.prototype, 'removeQueries');
+  try {
+    api.purchaseTariff.mockResolvedValue({
+      success: true,
+      delivery_pending: true,
+      subscription_id: 42,
+    });
+    show();
+    await screen.findByRole('combobox');
+    const buy = screen.getByRole('button', { name: 'subscription.purchase' });
+    await waitFor(() => expect((buy as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(buy);
+    await waitFor(() => expect(remove).toHaveBeenCalledWith({ queryKey: ['subscriptions-list'] }));
+    expect(remove).toHaveBeenCalledWith({ queryKey: ['subscription'] });
+    expect(api.purchaseTariff).toHaveBeenCalledTimes(1);
+  } finally {
+    remove.mockRestore();
+  }
+});

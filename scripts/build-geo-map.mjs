@@ -2,7 +2,7 @@
 /**
  * Собирает данные карты GEO-РФ для вкладки «Доступность → GEO».
  *
- * Вход (пути аргументами, по умолчанию — папка хендоффа бота `.claude/handoffs/geo/`):
+ * Вход (пути аргументами, по умолчанию — папка хендоффа бота `.codex/handoffs/geo/`):
  *   1. ru-regions-lite.geojson — контуры 83 субъектов РФ (свойства shapeISO «RU-MOW», name по-русски);
  *      первоисточник — geoBoundaries RUS ADM1 (ODbL, © участники OpenStreetMap), упрощённые контуры.
  *   2. citycoords.json — «region|city» → [lat, lon] для городов пула сервиса bschekbot.
@@ -25,7 +25,7 @@ import { resolve } from 'node:path';
 
 const HANDOFF = resolve(
   process.env.HOME ?? '',
-  'PycharmProjects/remnawave-bedolaga-telegram-bot/.claude/handoffs/geo',
+  'PycharmProjects/remnawave-bedolaga-telegram-bot/.codex/handoffs/geo',
 );
 const [geojsonPath, coordsPath, nodesPath, extraPath] = [
   process.argv[2] ?? resolve(HANDOFF, 'ru-regions-lite.geojson'),

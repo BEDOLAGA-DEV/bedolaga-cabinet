@@ -1,5 +1,16 @@
 import apiClient from './client';
 
+export interface BsTrafficSettings {
+  enabled?: boolean;
+  squad_uuids: string[];
+  /** 0 means unlimited. */
+  limit_gb: number;
+  topup_enabled: boolean;
+  /** Size in GB to price in kopeks. */
+  topup_packages: Record<string, number>;
+  max_topup_gb: number;
+}
+
 // Types
 export interface PeriodPrice {
   days: number;
@@ -87,6 +98,7 @@ export interface TariffDetail {
   min_traffic_gb: number;
   max_traffic_gb: number;
   // Докупка трафика
+  bs_traffic_settings?: BsTrafficSettings | null;
   traffic_topup_enabled: boolean;
   traffic_topup_packages: Record<string, number>;
   max_topup_traffic_gb: number;
@@ -105,6 +117,7 @@ export interface TariffDetail {
   trial_duration_days?: number | null;
   created_at: string;
   updated_at: string | null;
+  edit_version?: string | null;
 }
 
 export interface TariffCreateRequest {
@@ -136,6 +149,7 @@ export interface TariffCreateRequest {
   min_traffic_gb?: number;
   max_traffic_gb?: number;
   // Докупка трафика
+  bs_traffic_settings?: BsTrafficSettings | null;
   traffic_topup_enabled?: boolean;
   traffic_topup_packages?: Record<string, number>;
   max_topup_traffic_gb?: number;
@@ -161,6 +175,7 @@ export interface ExternalSquadInfo {
 }
 
 export interface TariffUpdateRequest {
+  expected_version?: string;
   name?: string;
   description?: string;
   is_active?: boolean;
@@ -190,6 +205,7 @@ export interface TariffUpdateRequest {
   min_traffic_gb?: number;
   max_traffic_gb?: number;
   // Докупка трафика
+  bs_traffic_settings?: BsTrafficSettings | null;
   traffic_topup_enabled?: boolean;
   traffic_topup_packages?: Record<string, number>;
   max_topup_traffic_gb?: number;

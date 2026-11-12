@@ -912,7 +912,36 @@
       "newPackage": "新流量包",
       "switch": "更改",
       "switched": "流量已更改"
-    }
+    },
+    "splitTraffic": {
+      "title": "剩余流量",
+      "ordinary": "普通流量",
+      "bs": "绕行流量",
+      "unlimited": "无限流量",
+      "disabled": "未包含",
+      "transition": "正在设置独立流量统计",
+      "error": "无法加载余额，请刷新重试。",
+      "pending": "部分用量正在核实，尚未从剩余流量中扣除。",
+      "updating": "正在更新…",
+      "review": "正在核实用量数据，剩余流量可能会调整。"
+    },
+    "splitPurchase": {
+      "storageUnavailable": "浏览器无法保存付款确认信息。请允许此网站存储数据，然后重试。",
+      "title": "添加流量",
+      "select": "选择流量包",
+      "quote": "查询价格",
+      "confirm": "使用余额购买",
+      "check": "查看购买结果",
+      "processing": "正在查看购买结果…",
+      "duration": "流量包有效期为30天。使用时需要有效的订阅。",
+      "balance": "余额不足，还需：",
+      "success": "流量包已添加。",
+      "pending": "付款已收到，流量包正在激活。",
+      "quoteError": "无法获取最新价格。请选择流量包后重试。",
+      "retry": "购买结果尚未确定。点击“查看购买结果”重试，不会重复扣费。"
+    },
+    "splitRenewalPending": "续费已支付并保存，设置仍在应用中。无需再次付款。",
+    "splitRenewalConfirmation": "已保存的确认：{{days}}天，{{amount}}。重试将使用相同金额。"
   },
   "balance": {
     "paymentEmail": "支付邮箱",
@@ -3708,7 +3737,9 @@
         "Dpichecker Request Timeout": "DPI//CHECKER — 请求超时",
         "Dpichecker Reference Subscription": "DPI//CHECKER — 参考订阅",
         "Proxy Url": "代理 URL",
-        "Telegram Api Url": "Telegram API URL"
+        "Telegram Api Url": "Telegram API URL",
+        "Bs Traffic Force Disconnect Enabled": "强制断开连接",
+        "Bs Traffic Uncertain Write Off Enabled": "不扣除归属不明的流量"
       },
       "offlineConv": "离线转化",
       "apiKey": "API 密钥",
@@ -4231,6 +4262,7 @@
       "dailyDeductionDesc": "每天从用户余额中扣除",
       "dailyPriceRequired": "请输入大于0的每日价格",
       "cannotSave": "无法保存套餐：",
+      "editConflict": "此套餐已在其他窗口中或被其他管理员修改。您的更改尚未保存。请刷新页面，核对设置后再保存。",
       "statusTitle": "套餐状态",
       "isActiveLabel": "已激活",
       "isActiveHint": "未激活的套餐不会显示给用户",
@@ -4258,7 +4290,33 @@
       "descriptionPlaceholder2": "套餐简短描述",
       "periodDisabled": "已禁用",
       "serverTrafficLimit": "流量限额",
-      "useDefault": "默认"
+      "useDefault": "默认",
+      "bs": {
+        "title": "BS 流量",
+        "description": "为绕过白名单的服务器设置独立流量。普通流量单独配置。",
+        "configure": "配置 BS 流量",
+        "applicationNote": "仅保存这些设置不会将现有订阅切换为分组计费。",
+        "limit": "包含流量，GB",
+        "zero": "0 表示不限量。不限量分组无需加购。",
+        "squads": "BS 分组",
+        "separate": "普通流量和 BS 流量应使用不同节点，分组不能重叠。",
+        "noSquads": "分组尚未加载。",
+        "topup": "允许加购 BS 流量",
+        "maximum": "包含加购的最大流量，GB（0 表示不限）",
+        "gb": "容量，GB",
+        "price": "价格，₽",
+        "remove": "删除",
+        "add": "添加流量包",
+        "invalid": "请选择分组并填写容量和价格。流量包容量不能重复，普通分组和 BS 分组不能重叠。",
+        "unavailable": "不可用的分组",
+        "errors": {
+          "topology": "无法分开普通流量和白名单流量。请选择包含节点且节点互不重叠的分组，并检查面板设置。",
+          "configuration": "要分别计费，请在面板中启用用户流量记录、关闭历史记录清理，并将流量记录阈值设为零。",
+          "unavailable": "无法检查面板。请检查连接和 API 权限，然后重新保存。",
+          "binding": "当前连接与已绑定面板不符。请恢复原连接设置，或先迁移现有订阅。",
+          "uncertainPolicy": "分别计费需要允许对边界不确定的流量少计。请先了解此风险，再在流量设置中启用该选项。"
+        }
+      }
     },
     "servers": {
       "title": "服务器管理",

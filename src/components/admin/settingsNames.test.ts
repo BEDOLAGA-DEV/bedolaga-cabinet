@@ -10,6 +10,7 @@ import { formatSettingKey } from './utils';
 // Title Case API names, not the historical lowerCamelCase locale aliases.
 const displayNames = [
   'Invite Only Enabled',
+  'Bs Traffic Uncertain Write Off Enabled',
   'Support Admin Ticket Notifications Enabled',
   'Admin Notifications Purchases Topic Id',
   'Grace Access Allowed Services',

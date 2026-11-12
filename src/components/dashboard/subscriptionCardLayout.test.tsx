@@ -139,3 +139,10 @@ describe('индикатор устройств', () => {
     expect(container.querySelector('.w-16 .rounded-full')).toBeTruthy();
   });
 });
+
+it('replaces the old common counter and refresh action while split is pending', async () => {
+  await renderCard(subscription({ traffic_accounting_mode: 'split_pending' }));
+  expect(screen.getByText('subscription.splitTraffic.transition')).toBeTruthy();
+  expect(screen.queryByText('9%')).toBeNull();
+  expect(screen.queryByRole('button', { name: 'common.refresh' })).toBeNull();
+});

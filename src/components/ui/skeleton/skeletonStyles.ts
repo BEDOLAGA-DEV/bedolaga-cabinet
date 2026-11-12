@@ -31,7 +31,7 @@ const VARIANT_FILL: Record<SkeletonVariant, string> = {
   card: 'border border-dark-500/40 bg-dark-500/25',
 };
 
-/** Радиусы по канону CLAUDE.md:134-137: строки — lg, внутренние панели — 2xl. */
+/** Радиусы по канону AGENTS.md и .codex/DESIGN_CANON.md: строки — lg, внутренние панели — 2xl. */
 const VARIANT_RADIUS: Record<SkeletonVariant, string> = {
   line: 'rounded-lg',
   card: 'rounded-2xl',

@@ -53,7 +53,7 @@ describe('skeletonClass', () => {
     expect(cls).not.toContain('bg-dark-500/40');
   });
 
-  // Канон CLAUDE.md:128-132 — только токены палитры.
+  // Канон AGENTS.md и .codex/DESIGN_CANON.md — только токены палитры.
   it('не содержит стоковых tailwind-цветов и сырых хексов', () => {
     for (const opts of [{}, { variant: 'card' as const }, { circle: true }]) {
       const cls = skeletonClass(opts);
