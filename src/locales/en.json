@@ -9151,6 +9151,7 @@
     "unexpected": "An unexpected error occurred"
   },
   "apiErrors": {
+    "trafficPurchaseNotApplied": "Traffic purchase was not applied. No funds were charged. Please try again.",
     "emailRegistered": "This email is already registered",
     "invalidCredentials": "Invalid email or password",
     "verifyEmail": "Please verify your email first",

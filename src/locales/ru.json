@@ -9276,6 +9276,7 @@
     "unexpected": "Произошла непредвиденная ошибка"
   },
   "apiErrors": {
+    "trafficPurchaseNotApplied": "Трафик не добавлен. Деньги не списаны. Попробуйте ещё раз.",
     "emailRegistered": "Этот email уже зарегистрирован",
     "invalidCredentials": "Неверный email или пароль",
     "verifyEmail": "Сначала подтвердите email",

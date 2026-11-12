@@ -9160,6 +9160,7 @@
     "unexpected": "خطای غیرمنتظره‌ای رخ داد"
   },
   "apiErrors": {
+    "trafficPurchaseNotApplied": "ترافیک اضافه نشد. مبلغی کسر نشده است. لطفاً دوباره تلاش کنید.",
     "emailRegistered": "این ایمیل قبلاً ثبت شده است",
     "invalidCredentials": "ایمیل یا رمز عبور نادرست است",
     "verifyEmail": "ابتدا ایمیل خود را تأیید کنید",
