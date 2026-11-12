@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.82.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.82.0...v1.82.1) (2026-11-12)
+
+
+### Bug Fixes
+
+* allow tariff switching after traffic exhaustion ([7c20439](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7c20439137834a962bdfc82d846f201af78157c7))
+* allow tariff switching after traffic exhaustion ([4c82fc8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4c82fc81cbac2ed598e59755a726b3b1a0c42571))
+* allow tariff switching after traffic exhaustion ([0f38b78](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0f38b78aeab349bcb6ee99a96848c242c03fb712))
+* allow tariff switching after traffic exhaustion ([50a2b7c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/50a2b7c640f617d28eef5e14c9d9f0eaeddf121c))
+* allow tariff switching after traffic exhaustion ([830c467](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/830c4678659feaa095186a6768e190d4ec8c377d))
+* configure CisPay autopay on the current subscription ([7c20439](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7c20439137834a962bdfc82d846f201af78157c7))
+* configure CisPay autopay on the current subscription ([4c82fc8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4c82fc81cbac2ed598e59755a726b3b1a0c42571))
+* configure CisPay autopay on the current subscription ([0f38b78](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0f38b78aeab349bcb6ee99a96848c242c03fb712))
+* configure CisPay autopay on the current subscription ([50a2b7c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/50a2b7c640f617d28eef5e14c9d9f0eaeddf121c))
+* configure CisPay autopay on the current subscription ([830c467](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/830c4678659feaa095186a6768e190d4ec8c377d))
+* distinguish rejected traffic purchases from uncertain payments ([7c20439](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7c20439137834a962bdfc82d846f201af78157c7))
+* distinguish rejected traffic purchases from uncertain payments ([4c82fc8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4c82fc81cbac2ed598e59755a726b3b1a0c42571))
+* distinguish rejected traffic purchases from uncertain payments ([0f38b78](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0f38b78aeab349bcb6ee99a96848c242c03fb712))
+* distinguish rejected traffic purchases from uncertain payments ([50a2b7c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/50a2b7c640f617d28eef5e14c9d9f0eaeddf121c))
+* distinguish rejected traffic purchases from uncertain payments ([830c467](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/830c4678659feaa095186a6768e190d4ec8c377d))
+* preserve renewal identity across retries ([7c20439](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7c20439137834a962bdfc82d846f201af78157c7))
+* preserve renewal identity across retries ([4c82fc8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4c82fc81cbac2ed598e59755a726b3b1a0c42571))
+* preserve renewal identity across retries ([0f38b78](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0f38b78aeab349bcb6ee99a96848c242c03fb712))
+* preserve renewal identity across retries ([50a2b7c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/50a2b7c640f617d28eef5e14c9d9f0eaeddf121c))
+* preserve renewal identity across retries ([830c467](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/830c4678659feaa095186a6768e190d4ec8c377d))
+* **subscription:** автоплатёж CisPay подключается прямо в панели подписки ([8d42e50](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8d42e50186b09a876885bdcabe0408f9d3634f6a))
+
 ## [1.82.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.81.1...v1.82.0) (2026-11-03)
 
 
