@@ -765,6 +765,8 @@ export const subscriptionApi = {
   getConnectionLink: async (
     subscriptionId?: number,
   ): Promise<{
+    subscription_id: number;
+    mirrors: { id: string; label: string; url: string }[];
     subscription_url: string | null;
     display_link: string | null;
     happ_redirect_link: string | null;

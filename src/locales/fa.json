@@ -952,7 +952,14 @@
     "allDevicesDeleted": "همه دستگاه‌ها حذف شدند",
     "platform": "پلتفرم",
     "model": "مدل",
-    "devicesFree_other": "{{count}} دستگاه رایگان"
+    "devicesFree_other": "{{count}} دستگاه رایگان",
+    "mirrors": {
+      "primary": "اصلی",
+      "choose": "نشانی اتصال: {{label}}",
+      "title": "نشانی اتصال",
+      "search": "جستجوی نشانی",
+      "empty": "نشانی یافت نشد"
+    }
   },
   "balance": {
     "paymentEmail": "ایمیل پرداخت",

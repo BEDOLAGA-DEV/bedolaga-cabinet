@@ -959,6 +959,13 @@
         "missingSubscription": "Subscription not found. Refresh and select it again.",
         "selectSubscription": "Select the subscription you want to set up automatic payments for first."
       }
+    },
+    "mirrors": {
+      "primary": "Primary",
+      "choose": "Connection address: {{label}}",
+      "title": "Connection address",
+      "search": "Find address",
+      "empty": "No address found"
     }
   },
   "balance": {

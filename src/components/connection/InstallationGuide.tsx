@@ -43,6 +43,7 @@ function isHappApp(app: RemnawaveAppClient | null): boolean {
 }
 
 interface Props {
+  mirrorSelector?: React.ReactNode;
   appConfig: AppConfig;
   onOpenDeepLink: (url: string) => void;
   isTelegramWebApp: boolean;
@@ -53,6 +54,7 @@ interface Props {
 
 export default function InstallationGuide({
   appConfig,
+  mirrorSelector,
   onOpenDeepLink,
   isTelegramWebApp,
   onGoBack,
@@ -66,7 +68,14 @@ export default function InstallationGuide({
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const [activePlatformKey, setActivePlatformKey] = useState<string | null>(null);
-  const [selectedApp, setSelectedApp] = useState<RemnawaveAppClient | null>(null);
+  const [selectedAppChoice, setSelectedApp] = useState<RemnawaveAppClient | null>(null);
+
+  const currentApps = activePlatformKey ? appConfig.platforms[activePlatformKey]?.apps : undefined;
+  const selectedApp =
+    currentApps?.find((app) => app.name === selectedAppChoice?.name) ??
+    currentApps?.find((app) => app.featured) ??
+    currentApps?.[0] ??
+    null;
 
   const getLocalizedText = useCallback(
     (text: LocalizedText | undefined): string => {
@@ -231,6 +240,7 @@ export default function InstallationGuide({
         <h2 className="min-w-0 flex-1 text-lg font-bold text-dark-100">
           {getBaseTranslation('installationGuideHeader', 'subscription.connection.title')}
         </h2>
+        {mirrorSelector}
         {appConfig.subscriptionUrl && onOpenQR && (
           <button
             onClick={() => onOpenQR()}

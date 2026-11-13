@@ -911,6 +911,13 @@
       "newPackage": "新流量包",
       "switch": "更改",
       "switched": "流量已更改"
+    },
+    "mirrors": {
+      "primary": "主地址",
+      "choose": "连接地址：{{label}}",
+      "title": "连接地址",
+      "search": "搜索地址",
+      "empty": "未找到地址"
     }
   },
   "balance": {
