@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.83.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.82.1...v1.83.0) (2026-11-13)
+
+### Features
+
+* add HOT Pay checkout and recurring payment controls ([616b700](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/616b7001bde240ec9f9bebd4d00b6609952d9ba4))
+* add scoped subscription mirror selection across cabinet ([f5a4e93](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f5a4e93b7386f598c51661d8d186957bafd832fa)), based on backend [PR #3369](https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot/pull/3369).
+
 ## [1.82.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.82.0...v1.82.1) (2026-11-12)
 
 ### Bug Fixes
