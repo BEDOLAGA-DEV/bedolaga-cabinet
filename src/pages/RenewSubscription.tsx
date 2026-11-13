@@ -1,5 +1,6 @@
 import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { safeSession } from '@/utils/safeStorage';
+import { renewalOperationId } from '@/utils/renewalOperation';
 import { isUncertainPurchaseOutcome } from '@/utils/api-error';
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -90,25 +91,43 @@ export default function RenewSubscription() {
   const renewMutation = useMutation({
     retry: false,
     mutationFn: (periodDays: number) => {
-      if (subscription?.traffic_accounting_mode !== 'split')
-        return subscriptionApi.renewSubscription(periodDays, subId);
       const key = `split-renewal:${subId}`;
       const saved = safeSession.getItem(key);
+      if (
+        !saved &&
+        subscription?.traffic_accounting_mode !== 'split' &&
+        subscription?.traffic_accounting_mode !== 'split_pending'
+      )
+        return subscriptionApi.renewSubscription(periodDays, subId, subscription?.end_date);
+      if (!subId || !subscription?.end_date)
+        throw new Error(t('subscription.purchaseOutcomeUnknown'));
       const attempt = saved
         ? JSON.parse(saved)
         : {
             period: periodDays,
-            operation: crypto.randomUUID(),
+            operation: renewalOperationId(subId, periodDays, subscription.end_date),
+            endDate: subscription.end_date,
             price: options?.find((option) => option.period_days === periodDays)?.price_kopeks,
           };
       // Retry the original confirmation even after navigation or a lost response.
-      if (attempt.period !== periodDays || !Number.isSafeInteger(attempt.price))
+      if (
+        attempt.period !== periodDays ||
+        !Number.isSafeInteger(attempt.price) ||
+        attempt.price < 0 ||
+        typeof attempt.endDate !== 'string' ||
+        !Number.isFinite(Date.parse(attempt.endDate)) ||
+        typeof attempt.operation !== 'string' ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(attempt.operation)
+      )
         throw new Error(t('subscription.purchaseOutcomeUnknown'));
       if (!safeSession.setItem(key, JSON.stringify(attempt))) {
         throw new Error('payment-storage-unavailable');
       }
       setConfirmedRenewal(attempt);
-      return subscriptionApi.renewSubscription(periodDays, subId, attempt.operation, attempt.price);
+      return subscriptionApi.renewSubscription(periodDays, subId, attempt.endDate, {
+        operationId: attempt.operation,
+        expectedPriceKopeks: attempt.price,
+      });
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['subscription'] });

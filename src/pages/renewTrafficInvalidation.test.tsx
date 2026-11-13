@@ -26,6 +26,7 @@ const state = {
   paused: false,
   split: false,
   price: 1000,
+  endDate: '2026-01-01T00:00:00Z',
 };
 const renew = vi.fn().mockResolvedValue({});
 const togglePause = vi.fn().mockResolvedValue({ success: true });
@@ -45,7 +46,7 @@ vi.mock('@/api/subscription', () => ({
           status: state.status,
           is_daily_paused: state.paused,
           daily_price_kopeks: 1000,
-          end_date: '2026-01-01T00:00:00Z',
+          end_date: state.endDate,
           days_left: 0,
         },
       }),
@@ -80,6 +81,7 @@ afterEach(() => {
   state.paused = false;
   state.split = false;
   state.price = 1000;
+  state.endDate = '2026-01-01T00:00:00Z';
   sessionStorage.clear();
   renew.mockReset().mockResolvedValue({});
   togglePause.mockResolvedValue({ success: true });
@@ -121,7 +123,7 @@ it('keeps confirmed split price and operation across uncertain retries', async (
   fireEvent.click(await screen.findByRole('button', { name: 'subscription.extend' }));
   await screen.findByText('subscription.purchaseOutcomeUnknown');
   const first = renew.mock.calls[0];
-  expect(first[3]).toBe(1000);
+  expect(first[3]).toMatchObject({ expectedPriceKopeks: 1000 });
   state.price = 2000;
   await client.invalidateQueries({ queryKey: ['renewal-options'] });
   fireEvent.click(await screen.findByRole('button', { name: 'subscription.splitPurchase.check' }));
@@ -137,7 +139,7 @@ it('shows paid pending renewal without a second payment button', async () => {
   await screen.findByText('subscription.splitRenewalPending');
   expect(screen.queryByRole('button', { name: 'subscription.extend' })).toBeNull();
   expect(JSON.parse(sessionStorage.getItem('split-renewal:42') ?? 'null').operation).toBe(
-    renew.mock.calls[0][2],
+    renew.mock.calls[0][3].operationId,
   );
   expect(screen.getByRole('button', { name: 'subscription.splitPurchase.check' })).toBeTruthy();
 });
@@ -156,7 +158,7 @@ it('retains split confirmation for a saved-cart 402 top-up retry', async () => {
   await screen.findByRole('button', { name: 'balance.topUp' });
   const stored = JSON.parse(sessionStorage.getItem('split-renewal:42') ?? 'null');
   expect(stored.price).toBe(1000);
-  expect(stored.operation).toBe(renew.mock.calls[0][2]);
+  expect(stored.operation).toBe(renew.mock.calls[0][3].operationId);
 });
 
 it('checks the same paid receipt after remount instead of starting another renewal', async () => {
@@ -187,4 +189,22 @@ it('does not submit renewal when the browser cannot persist its confirmation', a
   await screen.findByText('subscription.splitPurchase.storageUnavailable');
   expect(renew).not.toHaveBeenCalled();
   denied.mockRestore();
+});
+
+it('replays the original split confirmation after server expiry and mode change', async () => {
+  state.split = true;
+  renew.mockResolvedValueOnce({ delivery_pending: true });
+  await renderRenew();
+  fireEvent.click(await screen.findByRole('button', { name: /30 subscription.days/ }));
+  fireEvent.click(await screen.findByRole('button', { name: 'subscription.extend' }));
+  await screen.findByText('subscription.splitRenewalPending');
+  const first = renew.mock.calls[0];
+  cleanup();
+  state.endDate = '2027-01-01T00:00:00Z';
+  state.split = false;
+  await renderRenew();
+  await screen.findByText('subscription.splitRenewalPending');
+  fireEvent.click(await screen.findByRole('button', { name: 'subscription.splitPurchase.check' }));
+  await screen.findByText('renewed');
+  expect(renew.mock.calls[1]).toEqual(first);
 });

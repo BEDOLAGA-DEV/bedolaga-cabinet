@@ -1,3 +1,4 @@
+import { renewalOperationId } from '../utils/renewalOperation';
 import apiClient from './client';
 import { getYandexCid } from '../utils/yandexCid';
 
@@ -197,23 +198,28 @@ export const subscriptionApi = {
   renewSubscription: async (
     periodDays: number,
     subscriptionId?: number,
-    operationId?: string,
-    expectedPriceKopeks?: number,
+    expectedEndDate?: string,
+    confirmation?: { operationId: string; expectedPriceKopeks: number },
   ): Promise<{
     message: string;
     new_end_date: string;
     amount_paid_kopeks: number;
     delivery_pending?: boolean;
   }> => {
+    if (!subscriptionId || !expectedEndDate)
+      throw new Error('Renewal requires a subscription snapshot');
+    const operationId =
+      confirmation?.operationId ?? renewalOperationId(subscriptionId, periodDays, expectedEndDate);
     const response = await apiClient.post(
       '/cabinet/subscription/renew',
       ...bodyWithSubId(
         {
           period_days: periodDays,
           yandex_cid: getYandexCid() || undefined,
-          ...(operationId ? { operation_id: operationId } : {}),
-          ...(expectedPriceKopeks !== undefined
-            ? { expected_price_kopeks: expectedPriceKopeks }
+          operation_id: operationId,
+          expected_end_date: expectedEndDate,
+          ...(confirmation !== undefined
+            ? { expected_price_kopeks: confirmation.expectedPriceKopeks }
             : {}),
         },
         subscriptionId,
