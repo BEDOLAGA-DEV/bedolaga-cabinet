@@ -59,7 +59,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function show(supported = true, daily = false, deviceLimit = 1) {
+function show(supported = true, daily = false, deviceLimit = 1, payhot = false) {
   const tariff = {
     id: 7,
     name: 'Test',
@@ -83,12 +83,32 @@ function show(supported = true, daily = false, deviceLimit = 1) {
             balanceKopeks={100000}
             onBack={() => {}}
             sbpPurchaseEnabled
+            payhotPurchaseEnabled={payhot}
+            payhotMethods={['card']}
           />
         </MemoryRouter>
       </PlatformProvider>
     </QueryClientProvider>,
   );
 }
+
+it.each([false, true])('blocks HOTPay for an invalid device draft (daily=%s)', async (daily) => {
+  const preview = api.previewTariffPurchase.getMockImplementation();
+  if (!preview) throw new Error('Preview fixture is missing');
+  api.previewTariffPurchase.mockImplementation(async (request) => {
+    const quote = await preview(request);
+    return { ...quote, device_selection: { ...quote.device_selection, max_limit: 10000 } };
+  });
+  show(true, daily, 1, true);
+  const buy = screen.getByRole('button', { name: 'subscription.payhotRecurring.choose' });
+  await waitFor(() => expect((buy as HTMLButtonElement).disabled).toBe(false));
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: 'custom' } });
+  const input = screen.getByRole('spinbutton');
+  fireEvent.change(input, { target: { value: '0' } });
+  expect((buy as HTMLButtonElement).disabled).toBe(true);
+  fireEvent.change(input, { target: { value: '3' } });
+  await waitFor(() => expect((buy as HTMLButtonElement).disabled).toBe(false));
+});
 
 it('sends the selected devices and matching server quote; retries retain checkout ID', async () => {
   show();

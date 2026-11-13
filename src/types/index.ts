@@ -379,9 +379,13 @@ export interface TariffsPurchaseOptions {
   lava_recurrent_enabled?: boolean;
   cashera_recurrent_enabled?: boolean;
   cispay_recurrent_enabled?: boolean;
+  payhot_recurrent_enabled?: boolean;
+  payhot_recurrent_methods?: ('card' | 'sbp')[];
 }
 
 export interface ClassicPurchaseOptions {
+  payhot_recurrent_enabled?: boolean;
+  payhot_recurrent_methods?: ('card' | 'sbp')[];
   sales_mode: 'classic';
   currency: string;
   balance_kopeks: number;

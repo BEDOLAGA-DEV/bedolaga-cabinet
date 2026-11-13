@@ -1,3 +1,7 @@
+import PaymentPhoneInput, {
+  requiresPaymentPhone,
+  isValidPaymentPhone,
+} from '@/components/PaymentPhoneInput';
 import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
@@ -449,6 +453,7 @@ function SummaryCard({
   isSubmitting,
   canSubmit,
   stickyPayButton = false,
+  focusPaymentPhone = false,
   submitError,
   onSubmit,
 }: {
@@ -459,6 +464,7 @@ function SummaryCard({
   isSubmitting: boolean;
   canSubmit: boolean;
   stickyPayButton?: boolean;
+  focusPaymentPhone?: boolean;
   submitError: string | null;
   onSubmit: () => void;
 }) {
@@ -566,7 +572,9 @@ function SummaryCard({
               type="button"
               onClick={() => {
                 if (!canSubmit || isSubmitting) {
-                  const el = document.getElementById('contact-input');
+                  const el = focusPaymentPhone
+                    ? document.querySelector<HTMLInputElement>('[data-payment-phone]')
+                    : document.getElementById('contact-input');
                   if (el) {
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     el.classList.add('!border-error-500', '!ring-2', '!ring-error-500/50');
@@ -609,7 +617,9 @@ function SummaryCard({
           type="button"
           onClick={() => {
             if (!canSubmit || isSubmitting) {
-              const el = document.getElementById('contact-input');
+              const el = focusPaymentPhone
+                ? document.querySelector<HTMLInputElement>('[data-payment-phone]')
+                : document.getElementById('contact-input');
               if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 el.classList.add('!border-error-500', '!ring-2', '!ring-error-500/50');
@@ -842,6 +852,11 @@ export default function QuickPurchase() {
   const [giftMessage, setGiftMessage] = useState('');
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [selectedSubOption, setSelectedSubOption] = useState<string | null>(null);
+  const [paymentPhone, setPaymentPhone] = useState('');
+  const needsPaymentPhone = requiresPaymentPhone(selectedMethod, selectedSubOption);
+  useEffect(() => {
+    setPaymentPhone('');
+  }, [selectedMethod, selectedSubOption]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -995,11 +1010,21 @@ export default function QuickPurchase() {
 
   // Validation
   const canSubmit = useMemo(() => {
+    if (needsPaymentPhone && !isValidPaymentPhone(paymentPhone)) return false;
     if (!selectedTariffId || !selectedPeriodDays || !selectedMethod) return false;
     if (!isValidContact(contactValue)) return false;
     if (isGift && !isValidContact(giftRecipient)) return false;
     return true;
-  }, [selectedTariffId, selectedPeriodDays, selectedMethod, contactValue, isGift, giftRecipient]);
+  }, [
+    selectedTariffId,
+    selectedPeriodDays,
+    selectedMethod,
+    contactValue,
+    isGift,
+    giftRecipient,
+    needsPaymentPhone,
+    paymentPhone,
+  ]);
 
   // Purchase mutation
   const purchaseMutation = useMutation({
@@ -1042,6 +1067,7 @@ export default function QuickPurchase() {
       contact_type: detectContactType(contactValue),
       contact_value: contactValue.trim(),
       payment_method: paymentMethod,
+      ...(needsPaymentPhone ? { payment_phone: paymentPhone.trim() } : {}),
       language: i18n.language,
       is_gift: isGift,
       referrer: safeSession.getItem('landing_referrer') || undefined,
@@ -1248,6 +1274,11 @@ export default function QuickPurchase() {
                     />
                   ))}
                 </div>
+                {needsPaymentPhone && (
+                  <div className="mt-4">
+                    <PaymentPhoneInput value={paymentPhone} onChange={setPaymentPhone} />
+                  </div>
+                )}
               </div>
             )}
           </motion.div>
@@ -1269,6 +1300,11 @@ export default function QuickPurchase() {
               currentPrice={currentPrice}
               isSubmitting={isSubmitting}
               canSubmit={canSubmit}
+              focusPaymentPhone={
+                needsPaymentPhone &&
+                !isValidPaymentPhone(paymentPhone) &&
+                isValidContact(contactValue)
+              }
               submitError={submitError}
               onSubmit={handleSubmit}
               stickyPayButton={config?.sticky_pay_button}

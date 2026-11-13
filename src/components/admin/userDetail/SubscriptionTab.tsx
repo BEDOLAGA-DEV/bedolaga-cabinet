@@ -1,3 +1,4 @@
+import { PayHotRecurringPanel } from '@/components/subscription/manage/PayHotRecurringPanel';
 import { CisPayRecurringPanel } from '@/components/subscription/manage/CisPayRecurringPanel';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
@@ -146,6 +147,12 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
             </button>
           )}
 
+          <PayHotRecurringPanel
+            key={selectedSub.id}
+            subscriptionId={selectedSub.id}
+            adminUserId={props.userId}
+            canManage={can.manage}
+          />
           <CisPayRecurringPanel
             subscriptionId={selectedSub.id}
             adminUserId={props.userId}

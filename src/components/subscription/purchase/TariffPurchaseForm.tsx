@@ -1,3 +1,4 @@
+import { PayHotPurchaseButton } from './PayHotPurchaseButton';
 import { CisPayPurchaseButton } from './CisPayPurchaseButton';
 import { tariffTrafficLabel } from '../../../utils/tariffTrafficLabel';
 import { useEffect, useRef, useState } from 'react';
@@ -61,6 +62,9 @@ export interface TariffPurchaseFormProps {
   lavaPurchaseEnabled?: boolean;
   /** Оформление привязкой Cashera доступно — показать вторую CTA. */
   casheraPurchaseEnabled?: boolean;
+  payhotPurchaseEnabled?: boolean;
+  payhotMethods?: ('card' | 'sbp')[];
+  payhotSubscriptionId?: number;
   cispayPurchaseEnabled?: boolean;
   cispaySubscriptionId?: number;
   onBack: () => void;
@@ -73,6 +77,9 @@ export function TariffPurchaseForm({
   sbpPurchaseEnabled = false,
   lavaPurchaseEnabled = false,
   casheraPurchaseEnabled = false,
+  payhotPurchaseEnabled = false,
+  payhotMethods = [],
+  payhotSubscriptionId = subscriptionId,
   cispayPurchaseEnabled = false,
   cispaySubscriptionId = subscriptionId,
   onBack,
@@ -743,6 +750,18 @@ export function TariffPurchaseForm({
                 {sbpPurchaseButton}
                 {lavaPurchaseButton}
                 {casheraPurchaseButton}
+                {payhotPurchaseEnabled && !useCustomTraffic && (
+                  <PayHotPurchaseButton
+                    tariffId={tariff.id}
+                    subscriptionId={payhotSubscriptionId}
+                    methods={payhotMethods}
+                    periodDays={
+                      isDaily ? 1 : useCustomDays ? customDays : selectedTariffPeriod?.days
+                    }
+                    deviceLimit={recurrentDeviceLimit}
+                    disabled={purchaseMutation.isPending || quoteBlocked || !deviceInputValid}
+                  />
+                )}
                 {cispayPurchaseEnabled && !tariff.is_daily && !useCustomTraffic && (
                   <CisPayPurchaseButton
                     tariffId={tariff.id}
@@ -1265,6 +1284,22 @@ export function TariffPurchaseForm({
                     {sbpPurchaseButton}
                     {lavaPurchaseButton}
                     {casheraPurchaseButton}
+                    {payhotPurchaseEnabled && !useCustomTraffic && (
+                      <PayHotPurchaseButton
+                        tariffId={tariff.id}
+                        subscriptionId={payhotSubscriptionId}
+                        methods={payhotMethods}
+                        periodDays={
+                          tariff.is_daily
+                            ? 1
+                            : useCustomDays
+                              ? customDays
+                              : selectedTariffPeriod?.days
+                        }
+                        deviceLimit={recurrentDeviceLimit}
+                        disabled={purchaseMutation.isPending || quoteBlocked || !deviceInputValid}
+                      />
+                    )}
                     {cispayPurchaseEnabled && !tariff.is_daily && !useCustomTraffic && (
                       <CisPayPurchaseButton
                         tariffId={tariff.id}
