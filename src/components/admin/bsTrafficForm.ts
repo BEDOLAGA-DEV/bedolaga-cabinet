@@ -35,7 +35,7 @@ export function parseBsTrafficForm(
   state: BsTrafficFormState | null,
   ordinary: string[],
 ): BsTrafficSettings | null | undefined {
-  if (!state || (state.enabled === false && state.squads.length === 0)) return null;
+  if (!state || state.enabled === false) return null;
   if (
     !state.squads.length ||
     state.squads.length > 64 ||

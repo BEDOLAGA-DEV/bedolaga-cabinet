@@ -2,6 +2,26 @@ import { renewalOperationId } from '../utils/renewalOperation';
 import apiClient from './client';
 import { getYandexCid } from '../utils/yandexCid';
 
+export interface SplitDailyQuote {
+  subscription_id: number;
+  tariff_id: number;
+  tariff_name: string;
+  price_kopeks: number;
+  terms_hash: string;
+  old_end_date: string;
+  intended_end_date: string;
+  balance_kopeks: number;
+}
+export interface SplitDailyResult {
+  success: boolean;
+  is_paused: boolean;
+  charged_kopeks: number;
+  new_end_date: string;
+  delivery_pending: boolean;
+  replayed: boolean;
+  balance_kopeks: number;
+}
+
 export interface SplitTrafficGroupSummary {
   mode: 'disabled' | 'finite' | 'unlimited';
   // Exact decimal bytes; do not coerce to Number before formatting.
@@ -911,6 +931,15 @@ export const subscriptionApi = {
     base_upgrade_cost_kopeks?: number;
     discount_percent?: number;
     discount_kopeks?: number;
+    traffic_accounting_mode?: string;
+    expected_terms_hash?: string;
+    expected_end_date?: string;
+    billing_kind?: 'daily' | null;
+    source_daily_rate_kopeks?: number | null;
+    target_daily_rate_kopeks?: number | null;
+    paid_window_end?: string | null;
+    device_limit?: number;
+    split_limits?: Record<'ordinary' | 'bs', { mode: 'finite' | 'unlimited'; limit_gb: number }>;
   }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/tariff/switch/preview',
@@ -922,10 +951,16 @@ export const subscriptionApi = {
   switchTariff: async (
     tariffId: number,
     subscriptionId?: number,
+    confirmation?: {
+      operation_id: string;
+      expected_price_kopeks: number;
+      expected_terms_hash: string;
+    },
   ): Promise<{
     success: boolean;
     message: string;
     subscription: Subscription;
+    delivery_pending?: boolean;
     old_tariff_name: string;
     new_tariff_id: number;
     new_tariff_name: string;
@@ -936,7 +971,12 @@ export const subscriptionApi = {
     const response = await apiClient.post(
       '/cabinet/subscription/tariff/switch',
       ...bodyWithSubId(
-        { tariff_id: tariffId, period_days: 30, yandex_cid: getYandexCid() || undefined },
+        {
+          tariff_id: tariffId,
+          period_days: 30,
+          yandex_cid: getYandexCid() || undefined,
+          ...confirmation,
+        },
         subscriptionId,
       ),
     );
@@ -957,6 +997,32 @@ export const subscriptionApi = {
       undefined,
       withSubId(subscriptionId),
     );
+    return response.data;
+  },
+
+  quoteSplitDailyResume: async (subscriptionId: number): Promise<SplitDailyQuote> => {
+    const response = await apiClient.get(
+      '/cabinet/subscription/split-daily/quote',
+      withSubId(subscriptionId),
+    );
+    return response.data;
+  },
+  confirmSplitDailyResume: async (request: {
+    subscription_id: number;
+    operation_id: string;
+    expected_price_kopeks: number;
+    expected_terms_hash: string;
+  }): Promise<SplitDailyResult> => {
+    const response = await apiClient.post('/cabinet/subscription/split-daily/confirm', request);
+    return response.data;
+  },
+  getSplitDailyResumeResult: async (
+    subscriptionId: number,
+    operationId: string,
+  ): Promise<SplitDailyResult> => {
+    const response = await apiClient.get('/cabinet/subscription/split-daily/result', {
+      params: { subscription_id: subscriptionId, operation_id: operationId },
+    });
     return response.data;
   },
 

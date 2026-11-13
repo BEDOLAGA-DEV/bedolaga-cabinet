@@ -1,4 +1,6 @@
 import { resolveCisPayTarget } from '@/utils/cispayRecurring';
+import { useAuthStore } from '../store/auth';
+import { readTariffSwitchAttempt, tariffSwitchStorageKey } from '@/utils/tariffSwitchAttempt';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -86,7 +88,10 @@ export default function SubscriptionPurchase() {
   //  moved into <SwitchTariffSheet>)
 
   // Tariff switch
-  const [switchTariffId, setSwitchTariffId] = useState<number | null>(null);
+  const [selectedSwitchTariffId, setSwitchTariffId] = useState<number | null>(null);
+  const userId = useAuthStore((state) => state.user?.id);
+  const pendingSwitch = readTariffSwitchAttempt(tariffSwitchStorageKey(userId, subscriptionId));
+  const switchTariffId = pendingSwitch?.preview.new_tariff_id ?? selectedSwitchTariffId;
 
   // Auto-close all modals on success notification
   const handleCloseAllModals = () => {
@@ -107,7 +112,7 @@ export default function SubscriptionPurchase() {
 
   // (classic-mode helpers moved into <ClassicPurchaseWizard>)
 
-  if (isLoading || optionsLoading) {
+  if (isLoading || (optionsLoading && !pendingSwitch)) {
     return (
       <PageSkeleton leading={1} titleWidth="w-56">
         <Skeleton variant="card" className="h-32" />
@@ -116,7 +121,7 @@ export default function SubscriptionPurchase() {
     );
   }
 
-  if (optionsError || (!purchaseOptions && !optionsLoading)) {
+  if (!pendingSwitch && (optionsError || (!purchaseOptions && !optionsLoading))) {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('subscription.extend')}</h1>
@@ -142,14 +147,15 @@ export default function SubscriptionPurchase() {
   }
 
   const isScopedSwitch =
-    isTariffsMode &&
-    subscriptionId === subscription?.id &&
-    canOpenTariffSwitch(subscription) &&
-    !(
-      purchaseOptions &&
-      'subscription_on_free_tariff' in purchaseOptions &&
-      purchaseOptions.subscription_on_free_tariff
-    );
+    !!pendingSwitch ||
+    (isTariffsMode &&
+      subscriptionId === subscription?.id &&
+      canOpenTariffSwitch(subscription) &&
+      !(
+        purchaseOptions &&
+        'subscription_on_free_tariff' in purchaseOptions &&
+        purchaseOptions.subscription_on_free_tariff
+      ));
 
   if (isScopedSwitch && subscription && !showTariffPurchase) {
     return (
@@ -205,6 +211,7 @@ export default function SubscriptionPurchase() {
             </>
           ) : (
             <SwitchTariffSheet
+              key={`${userId}:${subscriptionId}`}
               open
               tariffId={switchTariffId}
               subscriptionId={subscriptionId}
@@ -350,6 +357,7 @@ export default function SubscriptionPurchase() {
 
           {/* Switch Tariff Preview Modal */}
           <SwitchTariffSheet
+            key={`${userId}:${subscriptionId}`}
             open={switchTariffId !== null}
             tariffId={switchTariffId}
             subscriptionId={subscriptionId}

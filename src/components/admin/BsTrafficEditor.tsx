@@ -34,6 +34,7 @@ export function BsTrafficEditor({ value, onChange, servers, ordinarySquads }: Pr
           <input
             type="checkbox"
             className="h-4 w-4 shrink-0 accent-accent-500"
+            aria-describedby={`${id}-sales-note ${id}-application-note`}
             checked={value !== null && value.enabled !== false}
             onChange={(event) => {
               onChange({
@@ -50,10 +51,15 @@ export function BsTrafficEditor({ value, onChange, servers, ordinarySquads }: Pr
           />
           {label('configure')}
         </label>
+        <p id={`${id}-sales-note`} className="text-sm leading-relaxed text-dark-300">
+          {label('salesNote')}
+        </p>
+        <p id={`${id}-application-note`} className="text-sm leading-relaxed text-dark-300">
+          {label('applicationNote')}
+        </p>
       </div>
       {value && value.enabled !== false && (
         <>
-          <p className="text-sm leading-relaxed text-dark-300">{label('applicationNote')}</p>
           <label className="block space-y-1 text-sm text-dark-100">
             <span className="block">{label('limit')}</span>
             <input

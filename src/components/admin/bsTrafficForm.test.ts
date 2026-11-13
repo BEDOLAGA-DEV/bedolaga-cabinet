@@ -36,7 +36,7 @@ it('preserves disabled saved terms and allows re-enabling without rebuilding the
   const form = bsTrafficFormState(disabled);
   if (!form) throw new Error('Expected saved form');
   expect(form.enabled).toBe(false);
-  expect(parseBsTrafficForm(form, [])).toEqual(disabled);
+  expect(parseBsTrafficForm(form, [])).toBeNull();
   expect(parseBsTrafficForm({ ...form, enabled: true }, [])).toEqual({
     ...settings,
     enabled: true,
@@ -58,3 +58,13 @@ it('can abandon a newly opened empty BS configuration', () => {
     ),
   ).toBeNull();
 });
+
+it.each([{ limitGb: '' }, { packages: [{ gb: '', rubles: '' }] }, { squads: ['one', 'one'] }])(
+  'disables without validating hidden draft %j',
+  (invalid) => {
+    const form = bsTrafficFormState(settings);
+    if (!form) throw new Error('Expected saved form');
+    expect(parseBsTrafficForm({ ...form, ...invalid, enabled: false }, ['one'])).toBeNull();
+    expect(parseBsTrafficForm({ ...form, ...invalid, enabled: true }, [])).toBeUndefined();
+  },
+);

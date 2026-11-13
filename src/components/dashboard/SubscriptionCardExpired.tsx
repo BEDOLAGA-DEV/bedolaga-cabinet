@@ -59,7 +59,9 @@ export default function SubscriptionCardExpired({
    * продаваться месяцем: тогда сервер отвечал «период недоступен», и кнопка
    * выглядела сломанной. Теперь она открывает выбор периода текущего тарифа.
    */
-  const isInstantRenew = isDisabledDaily || (isDaily && !!subscription.tariff_id);
+  const isInstantRenew =
+    subscription.traffic_accounting_mode !== 'split' &&
+    (isDisabledDaily || (isDaily && !!subscription.tariff_id));
   // Старая подписка (куплена в классике, тарифа нет): продлевать нечего,
   // единственная кнопка ведёт на витрину тарифов с этой подпиской.
   const requiresTariff = needsTariff(subscription);

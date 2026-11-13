@@ -70,6 +70,7 @@ const codeKeys = new Map<string, string>([
   ['subscription_tariff_mismatch', 'tariffMismatch'],
   ['subscription_selection_required', 'subscriptionSelection'],
   ['tariff_required', 'tariffRequired'],
+  ['split_renewal_not_ready', 'splitRenewalNotReady'],
 ]);
 
 // Closed field-label map: backend paths never become arbitrary translation keys.

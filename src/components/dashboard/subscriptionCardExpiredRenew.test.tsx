@@ -172,3 +172,15 @@ describe('суточный тариф', () => {
     expect(screen.queryByText('dashboard.expired.quickRenew')).toBeNull();
   });
 });
+
+it('split daily opens scoped confirmation instead of instant legacy debit', async () => {
+  await renderCard(
+    subscription({ is_daily: true, traffic_accounting_mode: 'split', daily_price_kopeks: 2000 }),
+    500000,
+  );
+  fireEvent.click(await screen.findByText('dashboard.expired.quickRenew'));
+  expect(await screen.findByText('экран выбора периода')).toBeTruthy();
+  expect(calls.renew).toEqual([]);
+  expect(calls.purchaseTariff).toEqual([]);
+  expect(calls.togglePause).toEqual([]);
+});

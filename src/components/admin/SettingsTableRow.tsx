@@ -112,6 +112,11 @@ export function SettingsTableRow({
           {isLongValue && description && (
             <p className="mt-1 text-xs leading-relaxed text-dark-400">{description}</p>
           )}
+          {setting.hint?.warning && (
+            <p className="mt-2 break-words text-sm leading-relaxed text-warning-400">
+              {setting.hint.warning}
+            </p>
+          )}
         </div>
 
         {/* Right side: control + action buttons */}

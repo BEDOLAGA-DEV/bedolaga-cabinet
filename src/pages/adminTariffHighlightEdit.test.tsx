@@ -121,7 +121,7 @@ it('stops BS sales while preserving settings and ordinary traffic', async () => 
   fireEvent.click(screen.getByText(resolveRu('admin.tariffs.tabExtra') as string));
   fireEvent.click(await screen.findByLabelText(resolveRu('admin.tariffs.bs.configure') as string));
   const payload = await save();
-  expect(payload.bs_traffic_settings).toEqual({ ...stored.bs_traffic_settings, enabled: false });
+  expect(payload.bs_traffic_settings).toBeNull();
   expect(payload.traffic_limit_gb).toBe(100);
 });
 
@@ -229,3 +229,42 @@ it('reopens disabled BS settings off and restores saved terms on enable', async 
   const payload = await save();
   expect(payload.bs_traffic_settings).toEqual({ ...stored.bs_traffic_settings, enabled: true });
 });
+
+it.each(['limit', 'package'])(
+  'saves disabled BS once despite incomplete %s and keeps the local draft',
+  async (invalid) => {
+    stored.bs_traffic_settings = {
+      enabled: true,
+      squad_uuids: ['11111111-1111-4111-8111-111111111111'],
+      limit_gb: 10,
+      topup_enabled: true,
+      topup_packages: { '5': 12345 },
+      max_topup_gb: 100,
+    };
+    renderEditPage();
+    await openPeriodsTab();
+    fireEvent.click(screen.getByText(resolveRu('admin.tariffs.tabExtra') as string));
+    const fieldLabel = resolveRu(
+      `admin.tariffs.bs.${invalid === 'limit' ? 'limit' : 'price'}`,
+    ) as string;
+    fireEvent.change(screen.getByLabelText(fieldLabel), { target: { value: '' } });
+    const saveButton = screen.getByText(
+      resolveRu('admin.tariffs.saveButton') as string,
+    ) as HTMLButtonElement;
+    expect(saveButton.disabled).toBe(true);
+    fireEvent.click(saveButton);
+    expect(updated).toHaveLength(0);
+    const toggle = screen.getByLabelText(resolveRu('admin.tariffs.bs.configure') as string);
+    fireEvent.click(toggle);
+    expect(saveButton.disabled).toBe(false);
+    expect(screen.queryByLabelText(fieldLabel)).toBeNull();
+    fireEvent.click(toggle);
+    expect((screen.getByLabelText(fieldLabel) as HTMLInputElement).value).toBe('');
+    expect(saveButton.disabled).toBe(true);
+    fireEvent.click(toggle);
+    const payload = await save();
+    expect(payload.bs_traffic_settings).toBeNull();
+    expect(payload.traffic_limit_gb).toBe(100);
+    expect(updated).toHaveLength(1);
+  },
+);

@@ -59,6 +59,7 @@ import {
   RadarIcon,
   WallIcon,
 } from '../components/icons';
+import { SplitDiagnostics } from '../components/admin/remnawave/SplitDiagnostics';
 import { GeoCheckModal } from '../components/admin/remnawave/GeoCheckModal';
 import { buildLink as buildDpiLink } from '../components/admin/dpichecker/deepLink';
 import { useDpiAvailable } from '../components/admin/dpichecker/useDpiStatus';
@@ -1702,16 +1703,19 @@ export default function AdminRemnawave() {
 
       {/* Tab Content */}
       {activeTab === 'overview' && (
-        <OverviewTab
-          stats={systemStats}
-          recap={recap}
-          devicesStats={devicesStats}
-          topConsumers={topConsumers}
-          health={health}
-          subRequests={subRequests}
-          isLoading={isLoadingStats}
-          onRefresh={() => refetchStats()}
-        />
+        <>
+          <SplitDiagnostics />
+          <OverviewTab
+            stats={systemStats}
+            recap={recap}
+            devicesStats={devicesStats}
+            topConsumers={topConsumers}
+            health={health}
+            subRequests={subRequests}
+            isLoading={isLoadingStats}
+            onRefresh={() => refetchStats()}
+          />
+        </>
       )}
 
       {activeTab === 'nodes' && (

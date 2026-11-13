@@ -629,6 +629,11 @@
       "activate": "Activate for {{price}}"
     },
     "switchTariff": {
+      "savedAmount": "Confirmed amount",
+      "check": "Check result",
+      "pending": "Your plan change is paid and saved. Settings are still being applied. No further payment is needed.",
+      "quoteChanged": "The price or plan conditions changed. Review the updated offer before confirming.",
+      "splitAddonsNotice": "Paid traffic packages and their expiry dates carry over. Your traffic reset date stays the same.",
       "title": "Switch Tariff",
       "preview": "Preview",
       "currentTariff": "Current tariff",
@@ -639,6 +644,9 @@
       "switch": "Switch",
       "switched": "Tariff switched",
       "notEnoughBalance": "Insufficient balance",
+      "dailyPaidUntil": "Paid until",
+      "nextDailyPayment": "Next daily charge",
+      "dailyKeepTerm": "Your paid day stays in place. Only the extra cost for its remaining time is charged now. Switching to a cheaper plan does not give a refund.",
       "dailyPayment": "Daily payment",
       "dailyChargeDescription": "Charged daily from your balance",
       "chooseTitle": "Choose a new plan",
@@ -988,7 +996,24 @@
       "retry": "The purchase result is not yet known. Use Check purchase to retry without another charge."
     },
     "splitRenewalPending": "Your renewal is paid and saved. Settings are still being applied. No further payment is needed.",
-    "splitRenewalConfirmation": "Saved confirmation: {{days}} days, {{amount}}. Retrying uses this same amount."
+    "splitRenewalConfirmation": "Saved confirmation: {{days}} days, {{amount}}. Retrying uses this same amount.",
+    "splitDaily": {
+      "title": "New paid day",
+      "estimatedEnd": "Estimated until {{date}}. The day starts at payment; any longer paid term is preserved.",
+      "consent": "Confirm the balance charge for one day.",
+      "pending": "Payment accepted. Access is updating — no further payment is needed.",
+      "checking": "Checking the previous confirmation result.",
+      "confirm": "Pay for one day",
+      "check": "Check result",
+      "retryConfirm": "Retry confirmation",
+      "changed": "Terms changed. Review the new offer before paying.",
+      "insufficient": "Insufficient balance. Top up and retry this confirmation.",
+      "storageError": "Could not save confirmation in this browser. Payment was not sent.",
+      "unknown": "The result is unknown. Check it before proceeding.",
+      "unavailable": "This action is currently unavailable. Try again later.",
+      "previewError": "Could not load the current offer.",
+      "complete": "Payment for the day confirmed."
+    }
   },
   "balance": {
     "paymentEmail": "Payment email",
@@ -5255,6 +5280,7 @@
         "title": "BS traffic",
         "description": "Separate allowance for allowlist-bypass servers. Ordinary traffic is configured separately.",
         "configure": "Configure BS traffic",
+        "salesNote": "After saving, turning this off stops new BS sales. Paid BS remains until its fixed expiry; renewing ordinary access does not extend it. The return to ordinary accounting is gradual. Re-enabling uses saved settings and does not refill balances.",
         "applicationNote": "Saving these settings alone does not move existing subscriptions to separate accounting.",
         "limit": "Included allowance, GB",
         "zero": "0 means unlimited. Unlimited groups do not need top-ups.",
@@ -8025,7 +8051,65 @@
     "dashboard": {
       "nodeUptime": "Uptime: {{uptime}}"
     },
-    "tariffSummary": "{{name}} ({{traffic}} GB, devices: {{devices}})"
+    "tariffSummary": "{{name}} ({{traffic}} GB, devices: {{devices}})",
+    "splitDiagnostics": {
+      "title": "Split traffic",
+      "description": "Accounting and queue status. Read only.",
+      "refresh": "Refresh",
+      "loading": "Loading split traffic status",
+      "error": "Could not read the current status. Try refreshing again.",
+      "never": "Not yet confirmed",
+      "checked": "Snapshot: {{date}}. A fresh cycle is at most {{seconds}} seconds old.",
+      "runtime": {
+        "unknown": "The background service is not observed here. Saved accounting data is shown below.",
+        "running": "The background service is running in this process.",
+        "stopped": "The background service in this process has stopped."
+      },
+      "truncated": "Active connections: {{count}}. Only the first 16 are shown; the rest were not checked.",
+      "unbound": "Waiting for a panel binding: {{count}}.",
+      "empty": "No active split accounting connections yet.",
+      "scope": "Connection {{number}}",
+      "ready": "Fresh cycle",
+      "attention": "Needs review",
+      "lastSuccess": "Last successful full cycle",
+      "phaseLabel": "Collection stage",
+      "phase": {
+        "building": "Preparing",
+        "collecting": "Collecting statistics",
+        "settling": "Processing usage",
+        "complete": "Complete",
+        "attention": "Needs review",
+        "unknown": "Not started yet"
+      },
+      "oldest": "Oldest unfinished task",
+      "pauseUntil": "Panel requests paused until",
+      "noQueue": "No unfinished tasks.",
+      "readinessCaution": "This is a general accounting check. Each subscription’s purchase readiness is checked separately.",
+      "disconnectOn": "Connection termination is enabled.",
+      "disconnectOff": "Connection termination is disabled.",
+      "socketCaution": "This diagnostic does not confirm that established connections were closed.",
+      "warning": {
+        "no_fresh_round": "No fresh successful full cycle. Check the collector.",
+        "round_errors": "The latest cycle has errors.",
+        "panel_backoff": "The panel requested a pause before retrying.",
+        "collection_pending": "Waiting for statistics collection",
+        "collection_attention": "Statistics collection needs review",
+        "settlement_pending": "Waiting for usage processing or fresh settlement",
+        "settlement_errors": "Usage processing errors",
+        "delivery_pending": "Waiting for access change confirmation",
+        "delivery_attention": "Access change outcome is uncertain",
+        "renewal_pending": "Waiting for renewal confirmation",
+        "enrollment_pending": "Waiting for split accounting activation",
+        "reverse_pending": "Waiting to return to ordinary accounting",
+        "node_tail_pending": "Waiting for late statistics from removed nodes",
+        "node_tail_attention": "Removed node history needs review",
+        "connection_drop_pending": "Waiting for a connection termination attempt",
+        "connection_drop_unknown": "Connection termination outcome is unknown",
+        "unknown": "A status needs operator review.",
+        "node_tail_delayed": "Removed node history collection is delayed",
+        "topology_attention": "Historical node records need review"
+      }
+    }
   },
   "adminUpdates": {
     "title": "Updates",
@@ -9244,6 +9328,7 @@
     "checkoutProcessed": "This purchase has already been accepted. Check your subscriptions before making another purchase.",
     "tariffMismatch": "This subscription requires a plan change. Refresh the page and choose Change plan.",
     "subscriptionSelection": "Select a subscription",
+    "splitRenewalNotReady": "Previous subscription changes are still being applied. Please try again shortly.",
     "tariffRequired": "The subscription has no plan. Choose a plan first.",
     "validation": {
       "missing": "This field is required",

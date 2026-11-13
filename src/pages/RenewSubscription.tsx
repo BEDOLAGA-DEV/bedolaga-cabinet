@@ -64,8 +64,15 @@ export default function RenewSubscription() {
   const subscription = subscriptionResponse?.subscription ?? null;
 
   // Load renewal options
-  const { data: options, isLoading } = useQuery({
+  const {
+    data: options,
+    isLoading,
+    error: optionsError,
+    refetch: refetchOptions,
+    isFetching: optionsFetching,
+  } = useQuery({
     queryKey: ['renewal-options', subId],
+    retry: false,
     queryFn: () => subscriptionApi.getRenewalOptions(subId),
     enabled: !!subId && !!subscription && !(subscription.is_daily && !subscription.is_trial),
     staleTime: 0,
@@ -245,7 +252,13 @@ export default function RenewSubscription() {
           className="space-y-4 rounded-2xl p-6"
           style={{ background: g.cardBg, border: `1px solid ${g.cardBorder}` }}
         >
-          <p className="text-sm text-dark-300">{t('subscription.dailyRenewalExplanation')}</p>
+          <p className="text-sm text-dark-300">
+            {t(
+              subscription.traffic_accounting_mode === 'split'
+                ? 'subscription.splitDaily.consent'
+                : 'subscription.dailyRenewalExplanation',
+            )}
+          </p>
           <p className="text-base font-semibold text-dark-50">
             {t('subscription.dailyRenewalPrice', {
               price: `${formatAmount((subscription.daily_price_kopeks ?? 0) / 100)}\u00A0${currencySymbol}`,
@@ -265,6 +278,22 @@ export default function RenewSubscription() {
             amount: `${formatAmount(confirmedRenewal.price / 100)}\u00a0${currencySymbol}`,
           })}
         </p>
+      ) : optionsError ? (
+        <div className="space-y-3">
+          <p
+            role="alert"
+            className="rounded-xl bg-error-400/10 p-3 text-center text-sm text-error-400"
+          >
+            {getLocalizedApiErrorMessage(optionsError, t('common.error'), t)}
+          </p>
+          <button
+            className="btn-secondary w-full"
+            disabled={optionsFetching}
+            onClick={() => void refetchOptions()}
+          >
+            {t('common.retry')}
+          </button>
+        </div>
       ) : !options || options.length === 0 ? (
         <div
           className="rounded-2xl p-6 text-center"
@@ -371,7 +400,10 @@ export default function RenewSubscription() {
 
       {/* Error */}
       {error && !missingAmount && (
-        <div className="rounded-xl bg-error-400/10 p-3 text-center text-sm text-error-400">
+        <div
+          role="alert"
+          className="rounded-xl bg-error-400/10 p-3 text-center text-sm text-error-400"
+        >
           {error}
         </div>
       )}
@@ -385,19 +417,21 @@ export default function RenewSubscription() {
         </div>
       )}
       {/* Renew button */}
-      {!(subscription?.is_daily && !subscription.is_trial) && selectedPeriod && (
-        <button
-          onClick={() => handleRenew(selectedPeriod)}
-          disabled={renewMutation.isPending}
-          className="w-full rounded-2xl bg-accent-500 py-3.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
-        >
-          {renewMutation.isPending
-            ? t('common.processing', 'Обработка...')
-            : confirmedRenewal
-              ? t('subscription.splitPurchase.check')
-              : t('subscription.extend', 'Продлить подписку')}
-        </button>
-      )}
+      {!(subscription?.is_daily && !subscription.is_trial) &&
+        selectedPeriod &&
+        (!optionsError || confirmedRenewal) && (
+          <button
+            onClick={() => handleRenew(selectedPeriod)}
+            disabled={renewMutation.isPending}
+            className="w-full rounded-2xl bg-accent-500 py-3.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
+          >
+            {renewMutation.isPending
+              ? t('common.processing', 'Обработка...')
+              : confirmedRenewal
+                ? t('subscription.splitPurchase.check')
+                : t('subscription.extend', 'Продлить подписку')}
+          </button>
+        )}
     </div>
   );
 }

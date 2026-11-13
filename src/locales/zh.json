@@ -582,6 +582,14 @@
       "currentSubContinues": "剩余天数将保留并计入已付费周期。"
     },
     "switchTariff": {
+      "savedAmount": "已确认金额",
+      "check": "查看结果",
+      "pending": "套餐变更已付款并保存。设置仍在应用中，无需再次付款。",
+      "quoteChanged": "价格或套餐条件已更改。请核对更新后的方案再确认。",
+      "splitAddonsNotice": "已购买的流量包及其有效期将保留，流量重置日期不变。",
+      "dailyPaidUntil": "已支付至",
+      "nextDailyPayment": "下一次日扣费",
+      "dailyKeepTerm": "已支付的当天时段保持不变。现在只收取剩余时段的差价。切换到更便宜的套餐不退款。",
       "dailyPayment": "每日付费",
       "dailyChargeDescription": "每日从余额中扣除",
       "currentTariff": "当前套餐",
@@ -940,7 +948,24 @@
       "retry": "购买结果尚未确定。点击“查看购买结果”重试，不会重复扣费。"
     },
     "splitRenewalPending": "续费已支付并保存，设置仍在应用中。无需再次付款。",
-    "splitRenewalConfirmation": "已保存的确认：{{days}}天，{{amount}}。重试将使用相同金额。"
+    "splitRenewalConfirmation": "已保存的确认：{{days}}天，{{amount}}。重试将使用相同金额。",
+    "splitDaily": {
+      "title": "新付费一天",
+      "estimatedEnd": "预计有效期至 {{date}}。从实际付款时开始计时；已有的更长付费期限将保留。",
+      "consent": "请确认从余额扣除一天的费用。",
+      "pending": "付款已受理，正在更新访问权限，无需再次付款。",
+      "checking": "正在查询上次确认的结果。",
+      "confirm": "支付一天费用",
+      "check": "查询结果",
+      "retryConfirm": "重试确认",
+      "changed": "条件已更改，请在付款前查看新报价。",
+      "insufficient": "余额不足，请充值后重试本次确认。",
+      "storageError": "无法在浏览器中保存确认，付款请求未发送。",
+      "unknown": "结果暂不明确，请查询后再继续。",
+      "unavailable": "当前无法执行此操作，请稍后再试。",
+      "previewError": "无法获取最新报价。",
+      "complete": "一天费用已确认支付。"
+    }
   },
   "balance": {
     "paymentEmail": "支付邮箱",
@@ -4294,6 +4319,7 @@
         "title": "BS 流量",
         "description": "为绕过白名单的服务器设置独立流量。普通流量单独配置。",
         "configure": "配置 BS 流量",
+        "salesNote": "保存后，关闭此选项将停止新的 BS 销售。已付费的 BS 保留至既定到期时间；续订普通访问不会延长该期限。系统会逐步恢复普通流量计费。重新启用时使用已保存的设置，不会补充余额。",
         "applicationNote": "仅保存这些设置不会将现有订阅切换为分组计费。",
         "limit": "包含流量，GB",
         "zero": "0 表示不限量。不限量分组无需加购。",
@@ -7897,7 +7923,65 @@
     "dashboard": {
       "nodeUptime": "运行时间：{{uptime}}"
     },
-    "tariffSummary": "{{name}}（{{traffic}} GB，设备数：{{devices}}）"
+    "tariffSummary": "{{name}}（{{traffic}} GB，设备数：{{devices}}）",
+    "splitDiagnostics": {
+      "title": "分离流量",
+      "description": "计费和任务队列状态。仅供查看。",
+      "refresh": "刷新",
+      "loading": "正在加载分离流量状态",
+      "error": "无法读取当前状态，请再次刷新。",
+      "never": "尚未确认",
+      "checked": "快照：{{date}}。最近成功的完整周期距检查时不超过 {{seconds}} 秒才算最新。",
+      "runtime": {
+        "unknown": "此处无法观察后台服务。下方显示已保存的计费数据。",
+        "running": "当前进程中的后台服务正在运行。",
+        "stopped": "当前进程中的后台服务已停止。"
+      },
+      "truncated": "活动连接：{{count}}。仅显示前 16 个，其余未检查。",
+      "unbound": "等待关联面板：{{count}}。",
+      "empty": "尚无活动的分离计费连接。",
+      "scope": "连接 {{number}}",
+      "ready": "周期为最新",
+      "attention": "需要检查",
+      "lastSuccess": "最近成功的完整周期",
+      "phaseLabel": "收集阶段",
+      "phase": {
+        "building": "准备中",
+        "collecting": "正在收集统计",
+        "settling": "正在处理用量",
+        "complete": "已完成",
+        "attention": "需要检查",
+        "unknown": "尚未开始"
+      },
+      "oldest": "最早的未完成任务",
+      "pauseUntil": "面板请求暂停至",
+      "noQueue": "没有未完成的任务。",
+      "readinessCaution": "这只是总体计费检查。每个订阅的购买条件会单独检查。",
+      "disconnectOn": "已启用连接终止。",
+      "disconnectOff": "已禁用连接终止。",
+      "socketCaution": "此诊断不能证明已建立的连接已经关闭。",
+      "warning": {
+        "no_fresh_round": "没有最新的成功完整周期，请检查收集服务。",
+        "round_errors": "最近的周期存在错误。",
+        "panel_backoff": "面板要求暂停后再重试。",
+        "collection_pending": "等待收集统计",
+        "collection_attention": "统计收集需要检查",
+        "settlement_pending": "等待处理用量或重新计算",
+        "settlement_errors": "用量处理错误",
+        "delivery_pending": "等待确认访问权限更改",
+        "delivery_attention": "访问权限更改结果不确定",
+        "renewal_pending": "等待确认续费",
+        "enrollment_pending": "等待启用分离计费",
+        "reverse_pending": "等待恢复普通计费",
+        "node_tail_pending": "等待已移除节点的延迟统计",
+        "node_tail_attention": "已移除节点的历史记录需要检查",
+        "connection_drop_pending": "等待尝试终止连接",
+        "connection_drop_unknown": "连接终止结果未知",
+        "unknown": "有状态需要管理员检查。",
+        "node_tail_delayed": "已移除节点的历史统计收集延迟",
+        "topology_attention": "节点历史记录需要检查"
+      }
+    }
   },
   "adminUpdates": {
     "title": "更新",
@@ -9116,6 +9200,7 @@
     "checkoutProcessed": "此购买已受理。再次购买前，请检查您的订阅列表。",
     "tariffMismatch": "所选订阅需要更换套餐。请刷新页面并选择“更换套餐”。",
     "subscriptionSelection": "请选择订阅",
+    "splitRenewalNotReady": "订阅的上一次更改仍在处理中，请稍后重试。",
     "tariffRequired": "订阅没有套餐，请先选择套餐。",
     "validation": {
       "missing": "此字段为必填项",

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { SettingDefinition } from '../../api/adminSettings';
+import type { SettingDefinition } from '../../api/adminSettings';
 import { StarIcon, LockIcon, RefreshIcon } from './icons';
 import { SettingInput } from './SettingInput';
 import { Toggle } from './Toggle';
@@ -81,6 +81,11 @@ export function SettingRow({
           </div>
           {description && (
             <p className="mt-1.5 text-sm leading-relaxed text-dark-400">{description}</p>
+          )}
+          {setting.hint?.warning && (
+            <p className="mt-2 break-words text-sm leading-relaxed text-warning-400">
+              {setting.hint.warning}
+            </p>
           )}
         </div>
 

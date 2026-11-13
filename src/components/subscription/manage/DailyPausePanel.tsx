@@ -1,3 +1,4 @@
+import { SplitDailyPausePanel } from './SplitDailyPausePanel';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
@@ -52,6 +53,9 @@ export function DailyPausePanel({ subscription, subscriptionId }: DailyPausePane
   });
 
   if (!subscription.is_daily || subscription.is_trial) return null;
+
+  if (subscription.traffic_accounting_mode === 'split')
+    return <SplitDailyPausePanel subscription={subscription} />;
 
   return (
     <>
