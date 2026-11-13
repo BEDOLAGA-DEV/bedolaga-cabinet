@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.83.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.82.1...v1.83.0) (2026-11-13)
+
+
+### Features
+
+* add HOT Pay checkout and recurring payment controls ([b8215c1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b8215c1519e5b57a7f722986d69f6c595c84eb26))
+* add HOT Pay checkout and recurring payment controls ([616b700](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/616b7001bde240ec9f9bebd4d00b6609952d9ba4))
+* add HOT Pay checkout and recurring payment controls ([f5a4e93](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f5a4e93b7386f598c51661d8d186957bafd832fa))
+* add scoped subscription mirror selection across cabinet ([b8215c1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b8215c1519e5b57a7f722986d69f6c595c84eb26))
+* add scoped subscription mirror selection across cabinet ([616b700](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/616b7001bde240ec9f9bebd4d00b6609952d9ba4))
+* add scoped subscription mirror selection across cabinet ([f5a4e93](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f5a4e93b7386f598c51661d8d186957bafd832fa))
+
 ## [1.82.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.82.0...v1.82.1) (2026-11-12)
 
 ### Bug Fixes
