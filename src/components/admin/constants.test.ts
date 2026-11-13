@@ -33,6 +33,14 @@ describe('SETTINGS_TREE', () => {
     expect(mapped.has('SOME_FUTURE_CATEGORY')).toBe(false);
   });
 
+  it('показывает регистрацию в отдельном разделе', () => {
+    expect(getMappedCategoryKeys().has('REGISTRATION_ACCESS')).toBe(true);
+    const users = SETTINGS_TREE.groups.find((group) => group.id === 'users');
+    expect(users?.children.find((child) => child.id === 'users_registration')?.categories).toEqual(
+      ['REGISTRATION_ACCESS'],
+    );
+  });
+
   it('не содержит категорию дважды', () => {
     const all = SETTINGS_TREE.groups
       .flatMap((group) => group.children)

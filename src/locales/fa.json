@@ -2564,6 +2564,7 @@
         "iface_additional": "اضافی",
         "users_support": "پشتیبانی",
         "users_referral": "معرفی",
+        "users_registration": "ثبت‌نام و دسترسی",
         "users_channel": "کانال",
         "users_localization": "بومی‌سازی",
         "users_moderation": "مدیریت محتوا",
@@ -2645,6 +2646,7 @@
         "LOCALIZATION": "بومی‌سازی",
         "CHANNEL": "کانال",
         "REFERRAL": "معرفی",
+        "REGISTRATION_ACCESS": "ثبت‌نام و دسترسی",
         "MODERATION": "مدیریت محتوا",
         "PAYMENT_VERIFICATION": "تأیید پرداخت‌ها",
         "SKIP": "رد کردن",
@@ -4622,6 +4624,8 @@
         "withdrawalSettings": "تنظیمات برداشت"
       },
       "settingsSubtitle": "تنظیمات برنامه معرفی و برداشت همکاران",
+      "advancedReferralSettings": "تنظیمات پیشرفته معرفی",
+      "advancedReferralSettingsDesc": "نرخ‌های کمیسیون، آستانه‌ها و محدودیت پاداش",
       "settingsUpdateError": "ذخیره تنظیمات همکاری ناموفق بود"
     },
     "partnerDetail": {

@@ -1,10 +1,12 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter } from 'react-router';
+import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PlatformProvider } from '@/platform/PlatformProvider';
 import type { PartnerSettings } from '@/api/partners';
+import type { SettingDefinition } from '@/api/adminSettings';
+import { usePermissionStore } from '@/store/permissions';
 
 /**
  * Настройка, закреплённая в .env, из кабинета не меняется: сервер пишет её в базу,
@@ -44,6 +46,40 @@ const state: { payload: PartnerSettings } = {
   },
 };
 
+const referralState = {
+  settings: [
+    {
+      key: 'REFERRAL_COMMISSION_PERCENT',
+      name: 'Referral Commission Percent',
+      category: { key: 'REFERRAL', label: 'Реферальная система' },
+      type: 'int',
+      is_optional: false,
+      current: 5,
+      original: 5,
+      has_override: false,
+      read_only: false,
+      env_locked: false,
+      choices: [],
+    },
+  ] as SettingDefinition[],
+  writes: [] as Array<{ key: string; value: unknown }>,
+  reads: 0,
+};
+
+vi.mock('@/api/adminSettings', () => ({
+  adminSettingsApi: {
+    getSettings: () => {
+      referralState.reads += 1;
+      return Promise.resolve(referralState.settings);
+    },
+    updateSetting: (key: string, value: unknown) => {
+      referralState.writes.push({ key, value });
+      return Promise.resolve(referralState.settings[0]);
+    },
+    resetSetting: () => Promise.resolve(referralState.settings[0]),
+  },
+}));
+
 vi.mock('@/api/partners', () => ({
   partnerApi: {
     getPartnerSettings: () => Promise.resolve(state.payload),
@@ -69,6 +105,10 @@ if (!window.matchMedia) {
 afterEach(() => {
   cleanup();
   state.payload = { ...state.payload, env_locked: [] };
+  referralState.settings[0] = { ...referralState.settings[0], env_locked: false };
+  referralState.writes.length = 0;
+  referralState.reads = 0;
+  usePermissionStore.getState().reset();
 });
 
 async function renderPage() {
@@ -78,7 +118,10 @@ async function renderPage() {
     <QueryClientProvider client={client}>
       <PlatformProvider>
         <MemoryRouter initialEntries={['/admin/partners/settings']}>
-          <Page />
+          <Routes>
+            <Route path="/admin/partners/settings" element={<Page />} />
+            <Route path="/admin/settings" element={<div>Системные настройки открыты</div>} />
+          </Routes>
         </MemoryRouter>
       </PlatformProvider>
     </QueryClientProvider>,
@@ -105,5 +148,48 @@ describe('поля, закреплённые в .env', () => {
       (screen.getByLabelText(/Раздел партнёрки виден в кабинете/) as HTMLInputElement).disabled,
     ).toBe(false);
     expect(screen.queryByText('Задано в .env')).toBeNull();
+  });
+});
+
+describe('основные реферальные настройки и права доступа', () => {
+  it('не запрашивает и не показывает системные настройки без settings:read', async () => {
+    await renderPage();
+    expect(screen.queryByText('REFERRAL_COMMISSION_PERCENT')).toBeNull();
+    expect(referralState.reads).toBe(0);
+    expect(screen.queryByRole('button', { name: 'Настройки системы' })).toBeNull();
+  });
+
+  it('показывает реферальные значения без возможности правки при settings:read', async () => {
+    usePermissionStore.setState({ permissions: ['settings:read'] });
+    await renderPage();
+    await screen.findByText('REFERRAL_COMMISSION_PERCENT');
+    expect(referralState.reads).toBe(1);
+    expect(screen.getByText('5')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: '5' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Настройки системы' }));
+    expect(screen.getByText('Системные настройки открыты')).toBeTruthy();
+  });
+
+  it('разрешает редактирование при settings:edit и не обходит env_locked', async () => {
+    usePermissionStore.setState({ permissions: ['settings:read', 'settings:edit'] });
+    await renderPage();
+    await screen.findByText('REFERRAL_COMMISSION_PERCENT');
+    fireEvent.click(screen.getByRole('button', { name: '5' }));
+    const input = screen.getByDisplayValue('5') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: '7' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await waitFor(() =>
+      expect(referralState.writes).toEqual([{ key: 'REFERRAL_COMMISSION_PERCENT', value: '7' }]),
+    );
+  });
+
+  it('оставляет поле, закреплённое в .env, только для просмотра', async () => {
+    usePermissionStore.setState({ permissions: ['settings:read', 'settings:edit'] });
+    referralState.settings[0] = { ...referralState.settings[0], env_locked: true };
+    await renderPage();
+    await screen.findByText('REFERRAL_COMMISSION_PERCENT');
+    expect(screen.queryByRole('button', { name: '5' })).toBeNull();
+    expect(screen.getByText('ENV')).toBeTruthy();
   });
 });
