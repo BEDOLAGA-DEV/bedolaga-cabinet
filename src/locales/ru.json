@@ -1053,6 +1053,7 @@
     "topUp": "Пополнить",
     "topUpBalance": "Пополнение баланса",
     "enterAmount": "Введите сумму",
+    "selectAmount": "Выберите сумму",
     "paymentMethod": "Способ оплаты",
     "paymentMethods": {
       "yookassa": {

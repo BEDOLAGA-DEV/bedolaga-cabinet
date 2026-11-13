@@ -418,6 +418,9 @@ export default function TopUpAmount() {
       ? method.quick_amounts.map((kopeks) => kopeks / 100)
       : [100, 300, 500, 1000]
   ).filter((a) => a >= minRubles && a <= maxRubles);
+  // Фиксированные суммы (например, цифровые товары с ценой): сумма выбирается кнопками,
+  // поле только показывает выбранное и не принимает ввод.
+  const fixedAmountsOnly = !!method.fixed_amounts_only && quickAmounts.length > 0;
   const currencyDecimals = targetCurrency === 'IRR' || targetCurrency === 'RUB' ? 0 : 2;
   const getQuickValue = (rub: number) =>
     targetCurrency === 'IRR'
@@ -530,7 +533,9 @@ export default function TopUpAmount() {
 
       {/* Amount input + Submit button - inline */}
       <motion.div variants={staggerItem} className="space-y-2">
-        <label className="text-sm font-medium text-dark-400">{t('balance.enterAmount')}</label>
+        <label className="text-sm font-medium text-dark-400">
+          {fixedAmountsOnly ? t('balance.selectAmount') : t('balance.enterAmount')}
+        </label>
         <div className="flex gap-2">
           <div
             className={`relative flex-1 rounded-2xl transition-all duration-200 ${
@@ -542,7 +547,8 @@ export default function TopUpAmount() {
             <input
               ref={inputRef}
               type="number"
-              inputMode="decimal"
+              inputMode={fixedAmountsOnly ? 'none' : 'decimal'}
+              readOnly={fixedAmountsOnly}
               enterKeyHint="done"
               value={amount}
               onChange={(e) => {
@@ -558,7 +564,9 @@ export default function TopUpAmount() {
                 }
               }}
               placeholder="0"
-              className="h-14 w-full bg-transparent px-4 pr-12 text-xl font-bold text-dark-100 placeholder:text-dark-600 focus:outline-none"
+              className={`h-14 w-full bg-transparent px-4 pr-12 text-xl font-bold text-dark-100 placeholder:text-dark-600 focus:outline-none ${
+                fixedAmountsOnly ? 'cursor-default caret-transparent' : ''
+              }`}
               autoComplete="off"
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base font-semibold text-dark-500">

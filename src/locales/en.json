@@ -1025,6 +1025,7 @@
     "topUp": "Top Up",
     "topUpBalance": "Top Up Balance",
     "enterAmount": "Enter amount",
+    "selectAmount": "Select amount",
     "paymentMethod": "Payment Method",
     "paymentMethods": {
       "yookassa": {

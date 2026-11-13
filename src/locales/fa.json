@@ -1018,6 +1018,7 @@
     "topUp": "شارژ",
     "topUpBalance": "شارژ موجودی",
     "enterAmount": "مقدار را وارد کنید",
+    "selectAmount": "مبلغ را انتخاب کنید",
     "paymentMethod": "روش پرداخت",
     "paymentMethods": {
       "yookassa": {
