@@ -1,3 +1,5 @@
+import { PayHotRecurringPanel } from './PayHotRecurringPanel';
+import { payHotSetupTariff } from '@/utils/payhotRecurring';
 import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { cisPaySetupTariff } from '@/utils/cispayRecurring';
 import { CisPayRecurringPanel } from './CisPayRecurringPanel';
@@ -293,6 +295,11 @@ export function RecurringPanels({ subscription, subscriptionId }: RecurringPanel
 
   return (
     <>
+      <PayHotRecurringPanel
+        key={subscription.id}
+        subscriptionId={subscription.id}
+        setupTariff={payHotSetupTariff(purchaseOptions, subscription)}
+      />
       <CisPayRecurringPanel
         subscriptionId={subscription.id}
         setupTariff={cisPaySetupTariff(purchaseOptions, subscription)}

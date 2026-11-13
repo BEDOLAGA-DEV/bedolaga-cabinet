@@ -911,6 +911,72 @@
       "newPackage": "新流量包",
       "switch": "更改",
       "switched": "流量已更改"
+    },
+    "payhotRecurring": {
+      "title": "HOT Pay 自动付款",
+      "method": "自动付款方式",
+      "methods": {
+        "card": "银行卡",
+        "sbp": "SBP"
+      },
+      "choose": "设置 HOT Pay 自动付款",
+      "confirm": "支付本周期并启用",
+      "consent": "现在通过 {{method}} 支付 {{amount}}，购买 {{days}} 天。之后每个相同周期支付 {{amount}}。",
+      "schedule": "首笔付款现在购买一个周期。剩余已付费时长将保留；后续扣款在已付费时长结束时进行。如有手续费，将在付款页面显示。您可在此关闭自动付款。",
+      "checking": "无法确认自动付款状态，请刷新重试。",
+      "refresh": "刷新",
+      "continue": "前往付款",
+      "manage": "管理订阅",
+      "period": "续费周期",
+      "terms": "{{amount}} / {{days}} 天",
+      "next": "下次付款：{{date}}",
+      "cancel": "关闭自动付款",
+      "cancelError": "无法关闭自动付款，请刷新状态后重试。",
+      "error": "操作未完成，请检查状态后重试。",
+      "state": {
+        "none": "未设置自动付款",
+        "CREATING": "正在设置自动付款",
+        "PENDING": "请完成付款并确认授权",
+        "ACTIVE": "自动付款已启用",
+        "PAUSED": "自动付款已暂停",
+        "CANCEL_PENDING": "正在关闭自动付款",
+        "CANCELLED": "自动付款已关闭",
+        "FAILED": "无法设置自动付款",
+        "REVIEW": "正在核实付款结果，请勿重复授权。",
+        "CREATION_UNKNOWN": "无法确认自动付款状态，请刷新重试。"
+      },
+      "reason": {
+        "price_changed": "价格已更改，新金额需要您重新同意。",
+        "manual_change": "订阅条件已更改，请检查自动付款设置。",
+        "payment_failed": "扣款失败，请检查付款方式。",
+        "provider_disabled": "运营商已关闭新自动付款设置，已有授权仍可取消。",
+        "customer": "您已关闭自动付款。",
+        "target_changed": "订阅参数已更改，请按新条件重新设置自动付款。",
+        "owner_missing": "账户不可用，请联系支持。",
+        "refund_review": "退款正在审核，新的扣款已暂停。",
+        "binding_failed": "无法确认付款方式授权。",
+        "credentials_changed": "付款设置已更改，请联系支持。",
+        "unknown_charge": "正在核实上次扣款结果，目前不会重复扣款。",
+        "account_merged": "账户已合并，请为当前账户重新设置自动付款。",
+        "account_deleted": "账户已删除，自动付款已停止。",
+        "subscription_deleted": "订阅已删除，自动付款已停止。",
+        "admin": "运营商已关闭自动付款。"
+      },
+      "errors": {
+        "changed": "条件已更改，请重新获取报价并检查金额。",
+        "expired": "报价已过期，请重新获取。",
+        "existing": "该订阅已有有效或待处理的自动付款。",
+        "missingSubscription": "找不到订阅，请刷新页面。",
+        "period": "自动付款不支持该周期。",
+        "disabled": "目前无法设置自动付款。"
+      }
+    },
+    "mirrors": {
+      "primary": "主地址",
+      "choose": "连接地址：{{label}}",
+      "title": "连接地址",
+      "search": "搜索地址",
+      "empty": "未找到地址"
     }
   },
   "balance": {
@@ -1011,6 +1077,10 @@
       },
       "aurapay": {
         "description": "通过 AuraPay 付款"
+      },
+      "payhot": {
+        "name": "HOT Pay",
+        "description": "银行卡、SBP 及其他付款方式"
       }
     },
     "transactionHistory": "交易记录",
@@ -1124,7 +1194,10 @@
     "top_up": "充值",
     "scanQrToPay": "请在银行应用中扫描二维码，或打开支付页面",
     "paymentOption": "付款方式",
-    "selectPaymentOption": "选择付款方式"
+    "selectPaymentOption": "选择付款方式",
+    "paymentPhone": "SberPay 手机号码",
+    "paymentPhoneHelp": "请输入绑定 SberBank Online 的手机号码。仅用于本次付款。",
+    "paymentPhoneInvalid": "请输入 +7XXXXXXXXXX 格式的手机号码。"
   },
   "referral": {
     "title": "推荐计划",
@@ -2616,7 +2689,8 @@
         "sys_cabinet": "用户中心",
         "sys_other": "其他设置",
         "sys_dpichecker": "DPI//CHECKER",
-        "payments_cashera": "Cashera"
+        "payments_cashera": "Cashera",
+        "payments_payhot": "HOT Pay"
       },
       "categories": {
         "ANORE": "Anore",
@@ -2678,7 +2752,8 @@
         "CHANNEL": "频道",
         "TIMEZONE": "时区",
         "REFERRAL": "推荐系统",
-        "MODERATION": "审核"
+        "MODERATION": "审核",
+        "PAYHOT": "HOT Pay"
       },
       "settingNames": {
         "Telegram Widget Size": "小部件大小",

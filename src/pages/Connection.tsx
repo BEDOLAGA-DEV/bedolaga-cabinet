@@ -1,3 +1,6 @@
+import { useSubscriptionMirror } from '@/hooks/useSubscriptionMirror';
+import { MirrorSelector } from '@/components/connection/MirrorSelector';
+import { mirrorAppConfig } from '@/utils/subscriptionMirrors';
 import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -29,21 +32,35 @@ export default function Connection() {
   hapticRef.current = hapticImpact;
 
   const {
-    data: appConfig,
+    data: canonicalAppConfig,
     isLoading,
     error,
   } = useQuery<AppConfig>({
-    queryKey: ['appConfig', subId],
+    queryKey: ['appConfig', subId, user?.id],
     queryFn: () => subscriptionApi.getAppConfig(subId),
   });
   const { data: connectionLink, isLoading: isConnectionLinkLoading } = useQuery({
-    queryKey: ['connectionLink', subId],
+    queryKey: ['connectionLink', subId, user?.id],
     queryFn: () => subscriptionApi.getConnectionLink(subId),
     retry: false,
     staleTime: 0,
   });
 
-  const qrConnectionUrl = useMemo(
+  const mirrorSelection = useSubscriptionMirror(
+    connectionLink,
+    canonicalAppConfig?.subscriptionUrl ?? null,
+    canonicalAppConfig?.hideLink,
+  );
+  const appConfig = useMemo(() => {
+    if (!canonicalAppConfig || !mirrorSelection.selectedId) return canonicalAppConfig;
+    return mirrorAppConfig(
+      canonicalAppConfig,
+      canonicalAppConfig.subscriptionUrl,
+      mirrorSelection.url,
+    );
+  }, [canonicalAppConfig, mirrorSelection.selectedId, mirrorSelection.url]);
+
+  const canonicalQrConnectionUrl = useMemo(
     () =>
       resolveConnectionUrlForUi({
         mode: connectionLink?.connect_mode,
@@ -67,6 +84,10 @@ export default function Connection() {
     ],
   );
 
+  const qrConnectionUrl = mirrorSelection.selectedId
+    ? mirrorSelection.url
+    : canonicalQrConnectionUrl;
+
   const handleGoBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
@@ -77,8 +98,9 @@ export default function Connection() {
       replace: !isTelegramWebApp,
       state: {
         url: qrConnectionUrl,
+        refreshConnection: true,
         hideLink: connectionLink?.hide_link ?? appConfig?.hideLink ?? false,
-        subscriptionId: subId,
+        subscriptionId: connectionLink?.subscription_id ?? subId,
       },
     });
   }, [
@@ -88,6 +110,7 @@ export default function Connection() {
     appConfig?.hideLink,
     isTelegramWebApp,
     subId,
+    connectionLink?.subscription_id,
   ]);
 
   useEffect(() => {
@@ -222,6 +245,7 @@ export default function Connection() {
 
   return (
     <InstallationGuide
+      mirrorSelector={<MirrorSelector selection={mirrorSelection} />}
       appConfig={appConfig}
       onOpenDeepLink={openDeepLink}
       isTelegramWebApp={isTelegramWebApp}
