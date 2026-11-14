@@ -10,6 +10,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 
 import { subscriptionApi } from '@/api/subscription';
 import { LiteMeter } from '@/components/lite/LiteMeter';
+import { LitePremiumMeters } from '@/components/lite/LitePremiumMeters';
 import { LiteRow, LiteRowGroup } from '@/components/lite/LiteRow';
 import { AutopayToggle } from '@/components/subscription/manage/AutopayToggle';
 import { DailyPausePanel } from '@/components/subscription/manage/DailyPausePanel';
@@ -22,6 +23,7 @@ import {
 import { DeleteSubscriptionSheet } from '@/components/subscription/sheets/DeleteSubscriptionSheet';
 import { DeviceReductionSheet } from '@/components/subscription/sheets/DeviceReductionSheet';
 import { DeviceTopupSheet } from '@/components/subscription/sheets/DeviceTopupSheet';
+import { PremiumTrafficTopupSheet } from '@/components/subscription/sheets/PremiumTrafficTopupSheet';
 import { ServerManagementSheet } from '@/components/subscription/sheets/ServerManagementSheet';
 import { TrafficTopupSheet } from '@/components/subscription/sheets/TrafficTopupSheet';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
@@ -36,7 +38,15 @@ import {
 } from '@/utils/legacySubscription';
 import { formatLiteDate } from '@/utils/liteDate';
 
-type OpenPanel = 'traffic' | 'devices' | 'reduce' | 'servers' | 'devicesList' | 'delete' | null;
+type OpenPanel =
+  | 'traffic'
+  | 'premium'
+  | 'devices'
+  | 'reduce'
+  | 'servers'
+  | 'devicesList'
+  | 'delete'
+  | null;
 
 /**
  * Простой вид управления подпиской.
@@ -206,6 +216,7 @@ export default function SubscriptionLite() {
           )}
           <ManagedTrafficSummary subscription={subscription} />
         </div>
+        <LitePremiumMeters items={subscription.premium_traffic ?? []} />
       </section>
 
       <Link
@@ -263,6 +274,23 @@ export default function SubscriptionLite() {
               <LiteRow
                 label={t('lite.rows.buyTraffic', 'Докупить трафик')}
                 onClick={() => setPanel('traffic')}
+              />
+            )
+          )}
+
+          {/* Докупка премиума: лист сам молчит, когда докупать нечего, но
+              строку показываем только при премиум-серверах в тарифе — иначе она
+              вела бы в пустую панель. */}
+          {panel === 'premium' ? (
+            <div className="py-4">
+              <PremiumTrafficTopupSheet {...sheetProps} />
+            </div>
+          ) : (
+            showsAddons &&
+            (subscription.premium_traffic ?? []).some((item) => item.topup_available) && (
+              <LiteRow
+                label={t('lite.rows.buyPremiumTraffic', 'Докупить премиум-трафик')}
+                onClick={() => setPanel('premium')}
               />
             )
           )}

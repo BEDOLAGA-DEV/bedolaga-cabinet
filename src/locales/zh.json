@@ -372,7 +372,10 @@
     "devicesShort": "台设备",
     "trafficUsage": "{{used}} / {{limit}} GB",
     "usedTraffic": "已使用 {{amount}}",
-    "daysRemaining": "剩余天数"
+    "daysRemaining": "剩余天数",
+    "premiumTraffic": "高级流量",
+    "premiumTrafficPaused": "流量已用尽 — 本期结束前暂停访问",
+    "premiumTrafficTopped": "已充值 {{amount}}"
   },
   "subscription": {
     "accounting": {
@@ -551,7 +554,12 @@
         "canAddLimited": "最多还能添加 {{count}} 台设备",
         "trialNotAllowed": "试用订阅不支持减少设备数"
       },
-      "reducing": "正在减少…"
+      "reducing": "正在减少…",
+      "buyPremiumTraffic": "购买高级流量",
+      "buyPremiumTrafficTitle": "高级流量",
+      "premiumTrafficHint": "高级节点的独立流量额度",
+      "premiumTrafficExhausted": "额度已用尽 — 充值即可恢复访问",
+      "premiumTopupCapReached": "每期最多可充值 {{cap}} GB"
     },
     "serverManagement": {
       "statusLegend": "✅ — 已连接 • ➕ — 将添加（付费）• ➖ — 将断开",
@@ -4332,7 +4340,23 @@
       "descriptionPlaceholder2": "套餐简短描述",
       "periodDisabled": "已禁用",
       "serverTrafficLimit": "流量限额",
-      "useDefault": "默认"
+      "useDefault": "默认",
+      "premiumLimitsTitle": "按节点的高级流量额度",
+      "premiumLimitsHint": "为单个节点设置独立流量额度。用尽后用户仅失去该节点的访问权限，其他节点仍可使用。0 表示该节点没有高级额度。",
+      "premiumLimitsNoServers": "请先选择套餐的节点",
+      "premiumLimitGb": "额度（GB）",
+      "premiumLimitName": "名称",
+      "premiumMoveUp": "上移",
+      "premiumMoveDown": "下移",
+      "premiumTopupEnabled": "允许充值",
+      "premiumPackages": "充值套餐",
+      "premiumPackagesEmpty": "暂无套餐 — 将无法充值",
+      "premiumPackageGb": "套餐容量（GB）",
+      "premiumPackagePrice": "套餐价格",
+      "premiumPackageAdd": "添加套餐",
+      "premiumPackageDuplicate": "容量相同的套餐在保存时会被合并",
+      "premiumMaxTopupGb": "上限（GB）",
+      "premiumMaxTopupHint": "0 表示不限制"
     },
     "servers": {
       "title": "服务器管理",
@@ -5507,7 +5531,35 @@
           }
         },
         "messages_other": "{{count}} 条消息",
-        "ticketLoadError": "无法打开工单"
+        "ticketLoadError": "无法打开工单",
+        "premiumTraffic": {
+          "title": "高级流量",
+          "limited": "已切断",
+          "notMeasured": "尚未统计",
+          "extra": "已加购 {{gb}} GB",
+          "period": "周期起始 {{date}}",
+          "checked": "统计于 {{date}}",
+          "grantLabel": "为 {{name}} 发放多少 GB",
+          "grant": "发放",
+          "resetSquad": "重置",
+          "resetTitle": "重置流量",
+          "resetButton": "重置",
+          "scope": {
+            "premium": "仅高级",
+            "regular": "仅普通",
+            "both": "高级和普通"
+          },
+          "scopeHint": {
+            "premium": "高级限额将开始新周期，已切断的服务器会恢复。普通流量不变。",
+            "regular": "将在面板中重置普通流量。高级限额不变。",
+            "both": "面板中的普通流量和高级限额都将重置。"
+          },
+          "granted": "已为 {{name}} 发放 {{gb}} GB。",
+          "resetPremiumDone": "高级周期已重新开始。",
+          "resetRegularDone": "普通流量已重置。",
+          "restoredNote": "服务器将在下一次检查时恢复给用户，最多 5 分钟。",
+          "error": "操作失败"
+        }
       },
       "notFound": "未找到用户",
       "sendMessage": {
@@ -9023,7 +9075,9 @@
       "plans": "查看套餐",
       "support": "客服",
       "copyLink": "复制订阅链接",
-      "copied": "已复制"
+      "copied": "已复制",
+      "buyPremiumTraffic": "购买高级流量",
+      "premiumPaused": "流量已用完"
     },
     "error": {
       "load": "无法加载数据",

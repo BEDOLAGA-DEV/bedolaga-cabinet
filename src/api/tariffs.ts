@@ -7,8 +7,20 @@ export interface PeriodPrice {
   price_rubles?: number;
 }
 
+// Премиум-лимит по одному серверу тарифа: свой лимит трафика и своя докупка.
+// Ноль в traffic_limit_gb означает «брать общий лимит тарифа», то есть премиума
+// на этом сервере нет.
 export interface ServerTrafficLimit {
   traffic_limit_gb: number;
+  /** Своё название лимита; пусто — берётся имя сервера. */
+  name?: string | null;
+  /** Порядок показа: и в админке, и в карточке пользователя. */
+  sort_order?: number;
+  topup_enabled?: boolean;
+  /** {ГБ: цена в копейках} */
+  topup_packages?: Record<string, number>;
+  /** Потолок докупки за период, 0 = без ограничения. */
+  max_topup_gb?: number;
 }
 
 export interface ServerInfo {
