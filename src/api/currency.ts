@@ -1,5 +1,7 @@
 // Currency exchange rate API
-// Uses free exchangerate.host API
+// Primary: open.er-api.com (free, no key, CORS). exchangerate.host убран:
+// сервис переехал на APILayer с обязательным access_key (окт 2026), /latest отдаёт
+// 301 -> docs -> 403. Фоллбэк — константы FALLBACK_RATES.
 
 import axios from 'axios';
 import { FALLBACK_RATES } from '../utils/currencyUnits';
@@ -50,19 +52,6 @@ export const currencyApi = {
     // Each source has its own failure boundary: a rejected primary request
     // must still reach the backup, just like an unsuccessful API response.
     try {
-      const response = await axios.get('https://api.exchangerate.host/latest', {
-        params: { base: 'RUB', symbols: 'USD,CNY,IRR' },
-      });
-      const rates = response.data?.success ? readRates(response.data.rates) : null;
-      if (rates) {
-        cachedRates = { rates, timestamp: Date.now() };
-        return rates;
-      }
-    } catch {
-      // Continue with the independent backup source.
-    }
-
-    try {
       const response = await axios.get('https://open.er-api.com/v6/latest/RUB');
       const rates = readRates(response.data?.rates);
       if (rates) {
@@ -70,7 +59,7 @@ export const currencyApi = {
         return rates;
       }
     } catch {
-      // Neither source is available; don't cache the transport failure.
+      // Continue with the fallback constants; don't cache transport failure.
     }
     return FALLBACK_RATES;
   },
