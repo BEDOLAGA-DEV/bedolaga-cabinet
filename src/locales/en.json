@@ -930,7 +930,6 @@
       "refresh": "Refresh",
       "error": "Could not set up autopay. Check your selection and retry. If your request was already sent, retrying returns the same payment.",
       "cancelError": "Cancellation has not been confirmed. Refresh the status or try again.",
-      "setup": "Enable autopay",
       "period": "Payment period",
       "state": {
         "none": "Autopay is not enabled.",
@@ -968,6 +967,72 @@
         "missingSubscription": "Subscription not found. Refresh and select it again.",
         "selectSubscription": "Select the subscription you want to set up automatic payments for first."
       }
+    },
+    "payhotRecurring": {
+      "title": "HOT Pay autopay",
+      "method": "Autopay method",
+      "methods": {
+        "card": "Card",
+        "sbp": "SBP"
+      },
+      "choose": "Set up HOT Pay autopay",
+      "confirm": "Pay for the period and enable",
+      "consent": "Now: {{amount}} for {{days}} days via {{method}}. Then: {{amount}} for each such period.",
+      "schedule": "The first payment buys a period now. Your remaining paid time is kept; subsequent charges are due when paid access expires. Any fee is shown on the payment page. You can disable autopay here.",
+      "checking": "Unable to confirm autopay status. Refresh to check again.",
+      "refresh": "Refresh",
+      "continue": "Continue to payment",
+      "manage": "Manage subscription",
+      "period": "Renewal period",
+      "terms": "{{amount}} for {{days}} days",
+      "next": "Next payment: {{date}}",
+      "cancel": "Disable autopay",
+      "cancelError": "Unable to disable autopay. Refresh its status and try again.",
+      "error": "Unable to complete the action. Check the status and try again.",
+      "state": {
+        "none": "Autopay is not connected",
+        "CREATING": "Setting up autopay",
+        "PENDING": "Complete payment and confirm authorization",
+        "ACTIVE": "Autopay is active",
+        "PAUSED": "Autopay is paused",
+        "CANCEL_PENDING": "Disabling autopay",
+        "CANCELLED": "Autopay is disabled",
+        "FAILED": "Unable to set up autopay",
+        "REVIEW": "Checking the payment result. Do not create another authorization.",
+        "CREATION_UNKNOWN": "Unable to confirm autopay status. Refresh to check again."
+      },
+      "reason": {
+        "price_changed": "The price changed. A new amount requires your consent.",
+        "manual_change": "Subscription terms changed. Check your autopay settings.",
+        "payment_failed": "The payment could not be charged. Check your payment method.",
+        "provider_disabled": "The operator disabled new autopay setups. You can still cancel an existing one.",
+        "customer": "Disabled by you.",
+        "target_changed": "Subscription settings changed. Set up autopay again with the new terms.",
+        "owner_missing": "The account is unavailable. Contact support.",
+        "refund_review": "A refund is being reviewed. New charges are paused.",
+        "binding_failed": "The payment method authorization could not be confirmed.",
+        "credentials_changed": "Payment settings changed. Contact support.",
+        "unknown_charge": "The last charge result is being checked. No repeat charge is being made yet.",
+        "account_merged": "The accounts were merged. Set up autopay again for the current account.",
+        "account_deleted": "The account was deleted. Autopay has stopped.",
+        "subscription_deleted": "The subscription was deleted. Autopay has stopped.",
+        "admin": "The operator disabled autopay."
+      },
+      "errors": {
+        "changed": "The terms changed. Request a new quote and check the amount.",
+        "expired": "The quote expired. Request a new one.",
+        "existing": "This subscription already has an active or pending autopay setup.",
+        "missingSubscription": "Subscription not found. Refresh the page.",
+        "period": "This period is not available for autopay.",
+        "disabled": "Autopay setup is currently unavailable."
+      }
+    },
+    "mirrors": {
+      "primary": "Primary",
+      "choose": "Connection address: {{label}}",
+      "title": "Connection address",
+      "search": "Find address",
+      "empty": "No address found"
     }
   },
   "balance": {
@@ -1068,6 +1133,10 @@
       },
       "cashera": {
         "description": "SBP, cards, crypto (Cashera)"
+      },
+      "payhot": {
+        "name": "HOT Pay",
+        "description": "Cards, SBP and other payment methods"
       }
     },
     "transactionHistory": "Transaction History",
@@ -1181,7 +1250,10 @@
       "tryAgain": "Try Again"
     },
     "top_up": "Top up balance",
-    "scanQrToPay": "Scan the QR code in your banking app or open the payment page"
+    "scanQrToPay": "Scan the QR code in your banking app or open the payment page",
+    "paymentPhone": "Phone number for SberPay",
+    "paymentPhoneHelp": "Enter the number linked to SberBank Online. It is used only for this payment.",
+    "paymentPhoneInvalid": "Enter a phone number in the format +7XXXXXXXXXX."
   },
   "referral": {
     "title": "Referral Program",
@@ -3464,7 +3536,8 @@
         "sys_cabinet": "Cabinet",
         "sys_other": "Other settings",
         "sys_dpichecker": "DPI//CHECKER",
-        "payments_cashera": "Cashera"
+        "payments_cashera": "Cashera",
+        "payments_payhot": "HOT Pay"
       },
       "categories": {
         "ANORE": "Anore",
@@ -3526,7 +3599,8 @@
         "CHANNEL": "Channel",
         "TIMEZONE": "Time Zone",
         "REFERRAL": "Referral System",
-        "MODERATION": "Moderation"
+        "MODERATION": "Moderation",
+        "PAYHOT": "HOT Pay"
       },
       "settingNames": {
         "Telegram Widget Size": "Widget Size",
@@ -9206,6 +9280,7 @@
     "unexpected": "An unexpected error occurred"
   },
   "apiErrors": {
+    "trafficPurchaseNotApplied": "Traffic purchase was not applied. No funds were charged. Please try again.",
     "emailRegistered": "This email is already registered",
     "invalidCredentials": "Invalid email or password",
     "verifyEmail": "Please verify your email first",

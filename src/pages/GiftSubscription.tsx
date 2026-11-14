@@ -1,3 +1,7 @@
+import PaymentPhoneInput, {
+  requiresPaymentPhone,
+  isValidPaymentPhone,
+} from '@/components/PaymentPhoneInput';
 import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { uiLocale } from '@/utils/uiLocale';
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
@@ -423,6 +427,12 @@ function BuyTabContent({
   const [paymentMode, setPaymentMode] = useState<'balance' | 'gateway'>('balance');
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [selectedSubOption, setSelectedSubOption] = useState<string | null>(null);
+  const [paymentPhone, setPaymentPhone] = useState('');
+  const needsPaymentPhone =
+    paymentMode === 'gateway' && requiresPaymentPhone(selectedMethod, selectedSubOption);
+  useEffect(() => {
+    setPaymentPhone('');
+  }, [selectedMethod, selectedSubOption, paymentMode]);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Тариф и период выбираются ОДНИМ эффектом: отмеченные оператором выгодными,
@@ -477,11 +487,20 @@ function BuyTabContent({
 
   // Validation
   const canSubmit = useMemo(() => {
+    if (needsPaymentPhone && !isValidPaymentPhone(paymentPhone)) return false;
     if (!selectedTariffId || !selectedPeriodDays) return false;
     if (paymentMode === 'gateway' && !selectedMethod) return false;
     if (insufficientBalance) return false;
     return true;
-  }, [selectedTariffId, selectedPeriodDays, paymentMode, selectedMethod, insufficientBalance]);
+  }, [
+    selectedTariffId,
+    selectedPeriodDays,
+    paymentMode,
+    selectedMethod,
+    insufficientBalance,
+    needsPaymentPhone,
+    paymentPhone,
+  ]);
 
   // Purchase mutation
   const purchaseMutation = useMutation({
@@ -546,6 +565,7 @@ function BuyTabContent({
       period_days: selectedPeriodDays,
       payment_mode: paymentMode,
       payment_method: paymentMethod,
+      ...(needsPaymentPhone ? { payment_phone: paymentPhone.trim() } : {}),
     };
 
     purchaseMutation.mutate(data);
@@ -686,6 +706,8 @@ function BuyTabContent({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {needsPaymentPhone && <PaymentPhoneInput value={paymentPhone} onChange={setPaymentPhone} />}
 
       {/* Summary / Balance info */}
       {paymentMode === 'balance' && (

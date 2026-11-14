@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.83.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.82.1...v1.83.0) (2026-11-13)
+
+### Features
+
+* add HOT Pay checkout and recurring payment controls ([616b700](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/616b7001bde240ec9f9bebd4d00b6609952d9ba4))
+* add scoped subscription mirror selection across cabinet ([f5a4e93](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f5a4e93b7386f598c51661d8d186957bafd832fa)), based on backend [PR #3369](https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot/pull/3369).
+
+## [1.82.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.82.0...v1.82.1) (2026-11-12)
+
+### Bug Fixes
+
+* Configure CisPay autopay on the current subscription ([#654](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/pull/654)).
+* Allow tariff switching after traffic exhaustion ([50a2b7c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/50a2b7c640f617d28eef5e14c9d9f0eaeddf121c)).
+* Preserve renewal operation identity across retries ([0f38b78](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0f38b78aeab349bcb6ee99a96848c242c03fb712)).
+* Distinguish rejected traffic purchases from uncertain payments ([4c82fc8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4c82fc81cbac2ed598e59755a726b3b1a0c42571)).
+
 ## [1.82.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.81.1...v1.82.0) (2026-11-03)
 
 
