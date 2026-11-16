@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PlatformProvider } from '@/platform/PlatformProvider';
-import type { PartnerSettings } from '@/api/partners';
+import type { PartnerSettings, PartnerSettingsUpdate } from '@/api/partners';
 
 /**
  * Настройка, закреплённая в .env, из кабинета не меняется: сервер пишет её в базу,
@@ -32,22 +32,28 @@ vi.mock('react-i18next', () => ({
   initReactI18next: { type: '3rdParty', init: () => {} },
 }));
 
-const state: { payload: PartnerSettings } = {
-  payload: {
-    withdrawal_enabled: true,
-    withdrawal_min_amount_kopeks: 100000,
-    withdrawal_cooldown_days: 30,
-    withdrawal_requisites_text: '',
-    partner_section_visible: true,
-    referral_program_enabled: true,
-    env_locked: [],
-  },
+const basePayload: PartnerSettings = {
+  withdrawal_enabled: true,
+  withdrawal_min_amount_kopeks: 100000,
+  withdrawal_cooldown_days: 30,
+  withdrawal_requisites_text: '',
+  partner_section_visible: true,
+  referral_program_enabled: true,
+  env_locked: [],
+};
+
+const state: { payload: PartnerSettings; updates: PartnerSettingsUpdate[] } = {
+  payload: { ...basePayload },
+  updates: [],
 };
 
 vi.mock('@/api/partners', () => ({
   partnerApi: {
     getPartnerSettings: () => Promise.resolve(state.payload),
-    updatePartnerSettings: () => Promise.resolve(state.payload),
+    updatePartnerSettings: (update: PartnerSettingsUpdate) => {
+      state.updates.push(update);
+      return Promise.resolve(state.payload);
+    },
   },
 }));
 
@@ -68,7 +74,8 @@ if (!window.matchMedia) {
 
 afterEach(() => {
   cleanup();
-  state.payload = { ...state.payload, env_locked: [] };
+  state.payload = { ...basePayload };
+  state.updates = [];
 });
 
 async function renderPage() {
@@ -105,5 +112,122 @@ describe('поля, закреплённые в .env', () => {
       (screen.getByLabelText(/Раздел партнёрки виден в кабинете/) as HTMLInputElement).disabled,
     ).toBe(false);
     expect(screen.queryByText('Задано в .env')).toBeNull();
+  });
+});
+
+/**
+ * Вывод средств. При выключенном выводе его поля отключены и в запрос не
+ * попадают: иначе значение вне границ сервера, введённое до выключения,
+ * отклоняло весь запрос (422), хотя кнопка «Сохранить» была доступна.
+ */
+describe('вывод средств', () => {
+  const MIN_AMOUNT = /Мин\. сумма вывода/;
+  const COOLDOWN = /Кулдаун между выводами/;
+  const REQUISITES = /Текст для поля реквизитов/;
+  const FIELD_KEYS = new Map<RegExp, keyof PartnerSettingsUpdate>([
+    [MIN_AMOUNT, 'withdrawal_min_amount_kopeks'],
+    [COOLDOWN, 'withdrawal_cooldown_days'],
+    [REQUISITES, 'withdrawal_requisites_text'],
+  ]);
+  const WITHDRAWAL_KEYS = [...FIELD_KEYS.values()];
+
+  const toggle = () => screen.getByLabelText(/Вывод средств включён/) as HTMLInputElement;
+  const field = (label: RegExp) => screen.getByLabelText(label) as HTMLInputElement;
+  const saveButton = () => screen.getByRole('button', { name: 'Сохранить' }) as HTMLButtonElement;
+
+  async function renderWithWithdrawal(enabled: boolean) {
+    state.payload = { ...state.payload, withdrawal_enabled: enabled };
+    await renderPage();
+    await waitFor(() => expect(toggle().checked).toBe(enabled));
+  }
+
+  function type(label: RegExp, value: string) {
+    fireEvent.change(field(label), { target: { value } });
+  }
+
+  async function save(): Promise<PartnerSettingsUpdate> {
+    fireEvent.click(saveButton());
+    await waitFor(() => expect(state.updates).toHaveLength(1));
+    return state.updates[0];
+  }
+
+  it('включение отправляет флаг и поля вывода', async () => {
+    await renderWithWithdrawal(false);
+    fireEvent.click(toggle());
+    type(MIN_AMOUNT, '50000');
+    type(COOLDOWN, '7');
+    type(REQUISITES, 'Карта или СБП');
+
+    expect(await save()).toMatchObject({
+      withdrawal_enabled: true,
+      withdrawal_min_amount_kopeks: 50000,
+      withdrawal_cooldown_days: 7,
+      withdrawal_requisites_text: 'Карта или СБП',
+    });
+  });
+
+  it('выключение отправляет только флаг — поля вывода на сервере остаются прежними', async () => {
+    await renderWithWithdrawal(true);
+    fireEvent.click(toggle());
+
+    const update = await save();
+    expect(update.withdrawal_enabled).toBe(false);
+    for (const key of WITHDRAWAL_KEYS) expect(update).not.toHaveProperty(key);
+  });
+
+  it('при выключенном выводе остальные настройки сохраняются', async () => {
+    await renderWithWithdrawal(false);
+    fireEvent.click(screen.getByLabelText(/Раздел партнёрки виден в кабинете/));
+
+    const update = await save();
+    expect(update).toMatchObject({ withdrawal_enabled: false, partner_section_visible: false });
+    for (const key of WITHDRAWAL_KEYS) expect(update).not.toHaveProperty(key);
+  });
+
+  it.each([
+    [MIN_AMOUNT, '0'],
+    [MIN_AMOUNT, '100000000'],
+    [COOLDOWN, '0'],
+    [COOLDOWN, '365'],
+  ])('граница %s = %s сохраняется', async (label, value) => {
+    await renderWithWithdrawal(true);
+    type(label, value);
+
+    expect(saveButton().disabled).toBe(false);
+    expect(await save()).toHaveProperty(String(FIELD_KEYS.get(label)), Number(value));
+  });
+
+  it.each([
+    [MIN_AMOUNT, '-1'],
+    [MIN_AMOUNT, '100000001'],
+    [MIN_AMOUNT, ''],
+    [COOLDOWN, '-1'],
+    [COOLDOWN, '366'],
+    [COOLDOWN, ''],
+  ])('при включённом выводе %s = «%s» не отправляется', async (label, value) => {
+    await renderWithWithdrawal(true);
+    type(label, value);
+
+    expect(saveButton().disabled).toBe(true);
+    fireEvent.click(saveButton());
+    expect(state.updates).toHaveLength(0);
+  });
+
+  it.each([
+    [COOLDOWN, '366'],
+    [COOLDOWN, '-1'],
+    [MIN_AMOUNT, '100000001'],
+    [MIN_AMOUNT, '-1'],
+  ])('недопустимое %s = %s перед выключением на сервер не уходит', async (label, value) => {
+    await renderWithWithdrawal(true);
+    type(label, value);
+    expect(saveButton().disabled).toBe(true);
+
+    fireEvent.click(toggle());
+    expect(saveButton().disabled).toBe(false);
+
+    const update = await save();
+    expect(update.withdrawal_enabled).toBe(false);
+    for (const key of WITHDRAWAL_KEYS) expect(update).not.toHaveProperty(key);
   });
 });
