@@ -89,12 +89,6 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
   const showList = multi && !detailView;
   const showCreate =
     can.manage && (subscriptions.length === 0 || (mode === 'multi' && (showList || !multi)));
-  const liveTariffIds = new Set(
-    subscriptions
-      .filter((sub) => sub.is_active || sub.status === 'trial' || sub.status === 'limited')
-      .map((sub) => sub.tariff_id)
-      .filter((id): id is number => id !== null),
-  );
   // В мультитарифе операции общие на человека — чья это оплата, не понять; не показываем.
   const lastPayment = multi
     ? null
@@ -221,7 +215,6 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
       {showCreate && (
         <CreateSubscriptionForm
           tariffs={props.tariffs}
-          excludeTariffIds={liveTariffIds}
           busy={busy}
           noSubscriptions={subscriptions.length === 0}
           onCreate={actions.createSubscription}

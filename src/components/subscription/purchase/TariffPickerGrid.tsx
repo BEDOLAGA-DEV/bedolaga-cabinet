@@ -15,6 +15,7 @@ import { tariffAction, type TariffActionKind } from './tariffAction';
 const TARIFF_ACTION_LABEL: Record<Exclude<TariffActionKind, 'current-daily' | 'switch'>, string> = {
   extend: 'subscription.extend',
   moveToTariff: 'subscription.cta.moveToTariff',
+  chooseCopy: 'subscription.copies.choose',
   purchase: 'subscription.purchase',
 };
 
@@ -43,6 +44,8 @@ export interface TariffPickerGridProps {
   switchSelection?: boolean;
   onSelectTariff: (tariff: Tariff) => void;
   onSwitchTariff: (tariffId: number) => void;
+  /** Тариф уже есть: спросить, продлить имеющуюся подписку или купить ещё одну. */
+  onChooseCopy?: (tariff: Tariff) => void;
 }
 
 export function TariffPickerGrid({
@@ -55,6 +58,7 @@ export function TariffPickerGrid({
   switchSelection = false,
   onSelectTariff,
   onSwitchTariff,
+  onChooseCopy = onSelectTariff,
 }: TariffPickerGridProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -62,6 +66,12 @@ export function TariffPickerGrid({
   const g = getGlassColors(isDark);
   const { formatAmount, currencySymbol } = useCurrency();
   const { applyPromoDiscount } = usePromoDiscount();
+
+  const copiesEnabled = Boolean(
+    purchaseOptions &&
+      'tariff_copies_enabled' in purchaseOptions &&
+      purchaseOptions.tariff_copies_enabled,
+  );
 
   const formatPrice = (kopeks: number) =>
     kopeks === 0
@@ -91,6 +101,7 @@ export function TariffPickerGrid({
 
       {/* Tariff Grid */}
       {isMultiTariff &&
+        !copiesEnabled &&
         purchaseOptions &&
         'all_tariffs_purchased' in purchaseOptions &&
         purchaseOptions.all_tariffs_purchased && (
@@ -119,8 +130,9 @@ export function TariffPickerGrid({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {[...tariffs]
           .filter((tariff) => {
-            // In multi-tariff mode: hide already purchased tariffs
-            if (isMultiTariff && tariff.is_purchased) return false;
+            // Мультитариф без копий тарифа (старый бэкенд): купленные прячутся.
+            // С копиями купленный тариф остаётся — нажатие спросит, продлить или купить ещё.
+            if (isMultiTariff && tariff.is_purchased && !copiesEnabled) return false;
             if (subscription?.is_trial && tariff.name.toLowerCase().includes('trial')) {
               return false;
             }
@@ -170,8 +182,14 @@ export function TariffPickerGrid({
                       </div>
                     )}
                   </div>
-                  {isCurrentTariff && (
-                    <span className="badge-success text-xs">{t('subscription.currentTariff')}</span>
+                  {action === 'chooseCopy' ? (
+                    <span className="badge-success text-xs">{t('subscription.copies.owned')}</span>
+                  ) : (
+                    isCurrentTariff && (
+                      <span className="badge-success text-xs">
+                        {t('subscription.currentTariff')}
+                      </span>
+                    )
                   )}
                 </div>
                 <div className="flex flex-wrap gap-4 text-sm">
@@ -291,7 +309,9 @@ export function TariffPickerGrid({
                     </button>
                   ) : (
                     <button
-                      onClick={() => onSelectTariff(tariff)}
+                      onClick={() =>
+                        action === 'chooseCopy' ? onChooseCopy(tariff) : onSelectTariff(tariff)
+                      }
                       className="btn-primary flex-1 py-2 text-sm"
                     >
                       {t(TARIFF_ACTION_LABEL[action])}

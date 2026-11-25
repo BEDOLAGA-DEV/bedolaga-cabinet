@@ -375,6 +375,18 @@
     "daysRemaining": "剩余天数"
   },
   "subscription": {
+    "copies": {
+      "title": "您已拥有 {{name}}",
+      "description": "续订现有订阅或再购买一份 — 每个订阅都有自己的设备、流量和连接链接。",
+      "renewUntil": "续订：至 {{date}}",
+      "renew": "续订",
+      "buyAnother": "再购买一份",
+      "choose": "续订或再购买",
+      "owned": "已拥有",
+      "activationQuestion": "您已拥有此套餐。将天数添加到现有订阅，还是作为拥有自己设备、流量和链接的单独订阅激活？",
+      "addToUntil": "添加到订阅：至 {{date}}",
+      "separate": "作为单独的订阅"
+    },
     "accounting": {
       "label": "可用流量",
       "available": "剩余总流量",

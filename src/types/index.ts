@@ -373,6 +373,9 @@ export interface TariffsPurchaseOptions {
   has_subscription?: boolean;
   // Multi-tariff: all available tariffs already purchased
   all_tariffs_purchased?: boolean;
+  // Мультитариф: купленный тариф можно купить ещё раз копией и перейти на него
+  // сменой. Нет флага — бэкенд копий не знает, купленные тарифы прячутся.
+  tariff_copies_enabled?: boolean;
   // СБП-оформление (Platega recurrent): показывать кнопку «Оформить с
   // автооплатой СБП» рядом с покупкой с баланса
   platega_recurrent_enabled?: boolean;

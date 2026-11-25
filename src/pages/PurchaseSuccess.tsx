@@ -13,6 +13,12 @@ import { Spinner } from '@/components/ui/Spinner';
 import { AnimatedCheckmark } from '@/components/ui/AnimatedCheckmark';
 import { AnimatedCrossmark } from '@/components/ui/AnimatedCrossmark';
 import { cn } from '../lib/utils';
+import { TariffChoicePrompt } from '@/components/subscription/TariffChoicePrompt';
+import {
+  tariffChoiceFromError,
+  type TariffChoiceAnswer,
+  type TariffChoiceSubscription,
+} from '@/utils/tariffChoice';
 
 const MAX_POLL_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -669,6 +675,8 @@ export default function PurchaseSuccess() {
   const [pollTimedOut, setPollTimedOut] = useState(false);
   const [isActivating, setIsActivating] = useState(false);
   const [activationError, setActivationError] = useState(false);
+  // Мультитариф: купленный тариф у аккаунта уже есть — куда активировать.
+  const [tariffChoice, setTariffChoice] = useState<TariffChoiceSubscription[] | null>(null);
   const activatingRef = useRef(false);
 
   // Referrer-Policy: prevent leaking payment token via referer header
@@ -717,21 +725,27 @@ export default function PurchaseSuccess() {
     refetch();
   }, [refetch]);
 
-  const handleActivate = useCallback(async () => {
-    if (!token || activatingRef.current) return;
-    activatingRef.current = true;
-    setIsActivating(true);
-    setActivationError(false);
-    try {
-      const result = await landingApi.activatePurchase(token);
-      queryClient.setQueryData(['purchase-status', token], result);
-    } catch {
-      setActivationError(true);
-    } finally {
-      activatingRef.current = false;
-      setIsActivating(false);
-    }
-  }, [token, queryClient]);
+  const handleActivate = useCallback(
+    async (answer?: TariffChoiceAnswer) => {
+      if (!token || activatingRef.current) return;
+      activatingRef.current = true;
+      setIsActivating(true);
+      setActivationError(false);
+      try {
+        const result = await landingApi.activatePurchase(token, answer);
+        setTariffChoice(null);
+        queryClient.setQueryData(['purchase-status', token], result);
+      } catch (error) {
+        const choice = tariffChoiceFromError(error);
+        if (choice) setTariffChoice(choice);
+        else setActivationError(true);
+      } finally {
+        activatingRef.current = false;
+        setIsActivating(false);
+      }
+    },
+    [token, queryClient],
+  );
 
   const isSuccess = purchaseStatus?.status === 'delivered';
 
@@ -840,9 +854,18 @@ export default function PurchaseSuccess() {
               giftMessage={purchaseStatus.gift_message}
               isGift={purchaseStatus.is_gift}
               isActivating={isActivating}
-              onActivate={handleActivate}
+              onActivate={() => handleActivate()}
               autoLoginToken={purchaseStatus.auto_login_token}
             />
+            {tariffChoice && (
+              <div className="flex justify-center">
+                <TariffChoicePrompt
+                  subscriptions={tariffChoice}
+                  busy={isActivating}
+                  onAnswer={(answer) => handleActivate(answer)}
+                />
+              </div>
+            )}
             {activationError && (
               <p className="text-center text-sm text-error-400">{t('landing.activationFailed')}</p>
             )}

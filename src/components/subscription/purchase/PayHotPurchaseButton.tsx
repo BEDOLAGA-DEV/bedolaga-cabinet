@@ -13,6 +13,8 @@ type Props = {
   tariffId: number | null;
   methods: ('card' | 'sbp')[];
   subscriptionId?: number;
+  /** Мультитариф: ещё одна копия тарифа, который у пользователя уже есть. */
+  asCopy?: boolean;
   periodDays?: number;
   deviceLimit?: number;
   disabled?: boolean;
@@ -47,6 +49,7 @@ export function PayHotPurchaseButton(props: Props) {
         subscription_id: props.subscriptionId,
         period_days: props.periodDays,
         device_limit: props.deviceLimit,
+        ...(props.asCopy && { as_copy: true }),
       });
       return { key: requestKey, data };
     },

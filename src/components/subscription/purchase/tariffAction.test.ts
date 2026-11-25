@@ -109,6 +109,44 @@ describe('tariffAction', () => {
     expect(ask({ isMultiTariff: true, subscriptionId: 2 })).toBe('purchase');
   });
 
+  describe('копии тарифа', () => {
+    const copies = {
+      sales_mode: 'tariffs',
+      tariff_copies_enabled: true,
+    } as unknown as PurchaseOptions;
+    const owned = { id: 99, is_current: false, is_purchased: true };
+
+    it('купленный тариф на витрине спрашивает: продлить или купить ещё', () => {
+      expect(ask({ isMultiTariff: true, tariff: owned, purchaseOptions: copies })).toBe(
+        'chooseCopy',
+      );
+      // Текущий тариф подписки тоже: у человека может быть несколько его копий.
+      expect(
+        ask({
+          isMultiTariff: true,
+          tariff: { id: 10, is_current: true, is_purchased: true },
+          purchaseOptions: copies,
+        }),
+      ).toBe('chooseCopy');
+    });
+
+    it('выбранная подписка решает сама: вопрос только на общей витрине', () => {
+      expect(
+        ask({ isMultiTariff: true, tariff: owned, purchaseOptions: copies, subscriptionId: 1 }),
+      ).toBe('switch');
+    });
+
+    it('бэкенд без копий — прежнее поведение', () => {
+      expect(ask({ isMultiTariff: true, tariff: owned })).toBe('purchase');
+    });
+
+    it('без мультитарифа вопроса нет', () => {
+      expect(ask({ tariff: owned, purchaseOptions: copies })).toBe(
+        ask({ purchaseOptions: copies }),
+      );
+    });
+  });
+
   it('вне режима тарифов флаги истечения не учитываются', () => {
     // subscription_is_expired приходит только в режиме тарифов; в классике
     // тот же ключ не должен превращать смену в покупку.

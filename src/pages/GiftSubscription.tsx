@@ -40,6 +40,12 @@ import { useCurrency } from '../hooks/useCurrency';
 import { usePlatform, useHaptic } from '@/platform';
 import { openPaymentUrl } from '../utils/openPaymentUrl';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { TariffChoicePrompt } from '@/components/subscription/TariffChoicePrompt';
+import {
+  tariffChoiceFromError,
+  type TariffChoiceAnswer,
+  type TariffChoiceSubscription,
+} from '@/utils/tariffChoice';
 import {
   SparklesIcon,
   GiftIcon,
@@ -791,6 +797,11 @@ function ActivateTabContent({ initialCode }: { initialCode?: string | null }) {
     if (initialCode) setCode(initialCode);
   }, [initialCode]);
   const [activateError, setActivateError] = useState<string | null>(null);
+  // Мультитариф: тариф подарка уже есть — куда активировать.
+  const [tariffChoice, setTariffChoice] = useState<{
+    giftCode: string;
+    subscriptions: TariffChoiceSubscription[];
+  } | null>(null);
   const [scanning, setScanning] = useState(false);
   const scannerRef = useRef<Html5QrcodeInstance | null>(null);
 
@@ -869,13 +880,21 @@ function ActivateTabContent({ initialCode }: { initialCode?: string | null }) {
   }, [applyScannedCode, stopScan, t]);
 
   const activateMutation = useMutation({
-    mutationFn: (giftCode: string) => giftApi.activateGiftCode(giftCode),
+    mutationFn: ({ giftCode, answer }: { giftCode: string; answer?: TariffChoiceAnswer }) =>
+      giftApi.activateGiftCode(giftCode, answer),
     onSuccess: () => {
+      setTariffChoice(null);
       queryClient.invalidateQueries({ queryKey: ['gift-received'] });
       queryClient.invalidateQueries({ queryKey: ['gift-sent'] });
       queryClient.invalidateQueries({ queryKey: ['balance'] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
     },
-    onError: (err) => {
+    onError: (err, variables) => {
+      const choice = tariffChoiceFromError(err);
+      if (choice) {
+        setTariffChoice({ giftCode: variables.giftCode, subscriptions: choice });
+        return;
+      }
       const raw = getApiErrorMessage(err, '');
       const msg =
         raw === 'Cannot activate your own gift'
@@ -889,7 +908,8 @@ function ActivateTabContent({ initialCode }: { initialCode?: string | null }) {
     const trimmed = code.trim();
     if (!trimmed || activateMutation.isPending) return;
     setActivateError(null);
-    activateMutation.mutate(trimmed);
+    setTariffChoice(null);
+    activateMutation.mutate({ giftCode: trimmed });
   };
 
   if (activateMutation.isSuccess && activateMutation.data) {
@@ -975,6 +995,16 @@ function ActivateTabContent({ initialCode }: { initialCode?: string | null }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {tariffChoice && (
+        <TariffChoicePrompt
+          subscriptions={tariffChoice.subscriptions}
+          busy={activateMutation.isPending}
+          onAnswer={(answer) =>
+            activateMutation.mutate({ giftCode: tariffChoice.giftCode, answer })
+          }
+        />
+      )}
 
       {/* Submit */}
       <button

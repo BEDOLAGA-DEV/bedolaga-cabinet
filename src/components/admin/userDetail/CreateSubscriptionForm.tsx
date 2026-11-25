@@ -6,9 +6,11 @@ import { PlusIcon } from '@/components/icons';
 import { Section } from './sectionParts';
 
 interface CreateSubscriptionFormProps {
+  /**
+   * Все доступные тарифы, включая уже имеющиеся у пользователя: в мультитарифе
+   * создание такого тарифа заводит ещё одну его копию.
+   */
   tariffs: UserAvailableTariff[];
-  /** Тарифы, по которым уже есть живая подписка — их второй раз не создают. */
-  excludeTariffIds: ReadonlySet<number>;
   busy: boolean;
   /** Подписок нет вовсе — сказать об этом. */
   noSubscriptions?: boolean;
@@ -21,7 +23,6 @@ const MAX_DAYS = 3650;
 /** «Создать подписку»: только когда подписки нет или в списке мультитарифа. */
 export function CreateSubscriptionForm({
   tariffs,
-  excludeTariffIds,
   busy,
   noSubscriptions,
   onCreate,
@@ -51,9 +52,7 @@ export function CreateSubscriptionForm({
             disabled={busy}
             options={[
               { value: '', label: t(`${ns}.selectTariff`) },
-              ...tariffs
-                .filter((item) => !excludeTariffIds.has(item.id))
-                .map((item) => ({ value: String(item.id), label: item.name })),
+              ...tariffs.map((item) => ({ value: String(item.id), label: item.name })),
             ]}
           />
         </label>

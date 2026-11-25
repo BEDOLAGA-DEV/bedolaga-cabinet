@@ -395,6 +395,18 @@
     "subscriptions": "Subscriptions"
   },
   "subscription": {
+    "copies": {
+      "title": "You already have {{name}}",
+      "description": "Renew your current subscription or buy one more — each subscription has its own devices, traffic and connection link.",
+      "renewUntil": "Renew: until {{date}}",
+      "renew": "Renew",
+      "buyAnother": "Buy one more",
+      "choose": "Renew or buy more",
+      "owned": "You have it",
+      "activationQuestion": "You already have this plan. Add the days to your current subscription or activate it as a separate subscription with its own devices, traffic and link?",
+      "addToUntil": "Add to subscription: until {{date}}",
+      "separate": "As a separate subscription"
+    },
     "accounting": {
       "label": "Available traffic",
       "available": "Total remaining",
