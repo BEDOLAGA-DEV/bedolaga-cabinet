@@ -67,6 +67,11 @@ export interface TariffPurchaseFormProps {
   payhotSubscriptionId?: number;
   cispayPurchaseEnabled?: boolean;
   cispaySubscriptionId?: number;
+  /**
+   * Мультитариф: покупка ещё одной копии тарифа, который у пользователя уже
+   * есть. Подписка не продлевается — создаётся новая.
+   */
+  asCopy?: boolean;
   onBack: () => void;
 }
 
@@ -82,6 +87,7 @@ export function TariffPurchaseForm({
   payhotSubscriptionId = subscriptionId,
   cispayPurchaseEnabled = false,
   cispaySubscriptionId = subscriptionId,
+  asCopy = false,
   onBack,
 }: TariffPurchaseFormProps) {
   const { t } = useTranslation();
@@ -122,6 +128,8 @@ export function TariffPurchaseForm({
   const [selectedDevices, setSelectedDevices] = useState<number | undefined>();
   const [deviceInputValid, setDeviceInputValid] = useState(true);
   const quoteUserId = useAuthStore((state) => state.user?.id);
+  // Признак копии уходит в API только для копии: обычные вызовы не меняются.
+  const copyArgs = asCopy ? ([true] as const) : ([] as const);
   const isDaily = Boolean(tariff.is_daily || tariff.daily_price_kopeks);
   const quoteDays = isDaily ? 1 : useCustomDays ? customDays : (selectedTariffPeriod?.days ?? 30);
   const quoteTraffic =
@@ -144,6 +152,7 @@ export function TariffPurchaseForm({
         traffic_gb: quoteTraffic,
         subscription_id: subscriptionId,
         selected_device_limit: selectedDevices,
+        ...(asCopy && { as_copy: true }),
       }),
     enabled: devicePreviewEnabled,
     retry: false,
@@ -193,6 +202,7 @@ export function TariffPurchaseForm({
           subscriptionId,
           checkoutAttempt.current.id,
           checkoutAttempt.current.devices,
+          ...copyArgs,
         );
       }
       if (quoteBlocked || !deviceInputValid)
@@ -217,7 +227,17 @@ export function TariffPurchaseForm({
       // the partial UNIQUE on uq_subscriptions_user_tariff_active.
       if (isDailyTariff && !devicePreviewEnabled) {
         checkoutRequestSent.current = true;
-        return subscriptionApi.purchaseTariff(tariff.id, days, trafficGb, subscriptionId);
+        return asCopy
+          ? subscriptionApi.purchaseTariff(
+              tariff.id,
+              days,
+              trafficGb,
+              subscriptionId,
+              undefined,
+              undefined,
+              true,
+            )
+          : subscriptionApi.purchaseTariff(tariff.id, days, trafficGb, subscriptionId);
       }
       const signature = JSON.stringify([
         tariff.id,
@@ -247,6 +267,7 @@ export function TariffPurchaseForm({
         subscriptionId,
         checkoutAttempt.current.id,
         checkoutAttempt.current.devices,
+        ...copyArgs,
       );
     },
     onError: (error) => {
@@ -287,6 +308,7 @@ export function TariffPurchaseForm({
           tariff.id,
           subscriptionId,
           recurrentDeviceLimit,
+          ...copyArgs,
         ),
       enabled:
         recurrentSelectionEnabled &&
@@ -388,8 +410,15 @@ export function TariffPurchaseForm({
     mutationFn: async () => {
       const selection = await recurrentSelection(0);
       return selection
-        ? subscriptionApi.purchaseWithSbpRecurring(tariff.id, subscriptionId, selection)
-        : subscriptionApi.purchaseWithSbpRecurring(tariff.id, subscriptionId);
+        ? subscriptionApi.purchaseWithSbpRecurring(
+            tariff.id,
+            subscriptionId,
+            selection,
+            ...copyArgs,
+          )
+        : asCopy
+          ? subscriptionApi.purchaseWithSbpRecurring(tariff.id, subscriptionId, undefined, true)
+          : subscriptionApi.purchaseWithSbpRecurring(tariff.id, subscriptionId);
     },
     onError: (error) => recurrentError(0, error),
     onSuccess: (data) => {
@@ -439,8 +468,15 @@ export function TariffPurchaseForm({
     mutationFn: async () => {
       const selection = await recurrentSelection(1);
       return selection
-        ? subscriptionApi.purchaseWithLavaRecurring(tariff.id, subscriptionId, selection)
-        : subscriptionApi.purchaseWithLavaRecurring(tariff.id, subscriptionId);
+        ? subscriptionApi.purchaseWithLavaRecurring(
+            tariff.id,
+            subscriptionId,
+            selection,
+            ...copyArgs,
+          )
+        : asCopy
+          ? subscriptionApi.purchaseWithLavaRecurring(tariff.id, subscriptionId, undefined, true)
+          : subscriptionApi.purchaseWithLavaRecurring(tariff.id, subscriptionId);
     },
     onError: (error) => recurrentError(1, error),
     onSuccess: (data) => {
@@ -490,8 +526,15 @@ export function TariffPurchaseForm({
     mutationFn: async () => {
       const selection = await recurrentSelection(2);
       return selection
-        ? subscriptionApi.purchaseWithCasheraRecurring(tariff.id, subscriptionId, selection)
-        : subscriptionApi.purchaseWithCasheraRecurring(tariff.id, subscriptionId);
+        ? subscriptionApi.purchaseWithCasheraRecurring(
+            tariff.id,
+            subscriptionId,
+            selection,
+            ...copyArgs,
+          )
+        : asCopy
+          ? subscriptionApi.purchaseWithCasheraRecurring(tariff.id, subscriptionId, undefined, true)
+          : subscriptionApi.purchaseWithCasheraRecurring(tariff.id, subscriptionId);
     },
     onError: (error) => recurrentError(2, error),
     onSuccess: (data) => {
@@ -754,6 +797,7 @@ export function TariffPurchaseForm({
                   <PayHotPurchaseButton
                     tariffId={tariff.id}
                     subscriptionId={payhotSubscriptionId}
+                    asCopy={asCopy}
                     methods={payhotMethods}
                     periodDays={
                       isDaily ? 1 : useCustomDays ? customDays : selectedTariffPeriod?.days
@@ -766,6 +810,7 @@ export function TariffPurchaseForm({
                   <CisPayPurchaseButton
                     tariffId={tariff.id}
                     subscriptionId={cispaySubscriptionId}
+                    asCopy={asCopy}
                     periodDays={useCustomDays ? customDays : selectedTariffPeriod?.days}
                     deviceLimit={recurrentDeviceLimit}
                     disabled={purchaseMutation.isPending || quoteBlocked}
@@ -1288,6 +1333,7 @@ export function TariffPurchaseForm({
                       <PayHotPurchaseButton
                         tariffId={tariff.id}
                         subscriptionId={payhotSubscriptionId}
+                        asCopy={asCopy}
                         methods={payhotMethods}
                         periodDays={
                           tariff.is_daily
@@ -1304,6 +1350,7 @@ export function TariffPurchaseForm({
                       <CisPayPurchaseButton
                         tariffId={tariff.id}
                         subscriptionId={cispaySubscriptionId}
+                        asCopy={asCopy}
                         periodDays={useCustomDays ? customDays : selectedTariffPeriod?.days}
                         deviceLimit={recurrentDeviceLimit}
                         disabled={purchaseMutation.isPending || quoteBlocked}

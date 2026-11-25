@@ -12,6 +12,12 @@ import { AnimatedCheckmark } from '@/components/ui/AnimatedCheckmark';
 import { cn } from '@/lib/utils';
 import { CheckCircleIcon, CheckIcon, CopyIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { TariffChoicePrompt } from '@/components/subscription/TariffChoicePrompt';
+import {
+  tariffChoiceFromError,
+  type TariffChoiceAnswer,
+  type TariffChoiceSubscription,
+} from '@/utils/tariffChoice';
 
 const MAX_POLL_MS = 10 * 60 * 1000; // poll an unsettled payment for up to 10 min
 
@@ -39,6 +45,8 @@ export default function GiftClaim() {
   const [showEmail, setShowEmail] = useState(false);
   const [claimError, setClaimError] = useState<string | null>(null);
   const [result, setResult] = useState<GiftClaimResult | null>(null);
+  // Мультитариф: тариф подарка у этого аккаунта уже есть — куда активировать.
+  const [tariffChoice, setTariffChoice] = useState<TariffChoiceSubscription[] | null>(null);
   const [copied, setCopied] = useState(false);
 
   const {
@@ -61,8 +69,9 @@ export default function GiftClaim() {
   });
 
   const claimMutation = useMutation({
-    mutationFn: () => landingApi.claimGift(token!, email.trim()),
+    mutationFn: (answer?: TariffChoiceAnswer) => landingApi.claimGift(token!, email.trim(), answer),
     onSuccess: (res) => {
+      setTariffChoice(null);
       // One-click cabinet login for a fresh email account; otherwise show the link.
       if (res.auto_login_token) {
         navigate(`/auto-login?token=${encodeURIComponent(res.auto_login_token)}`);
@@ -71,6 +80,11 @@ export default function GiftClaim() {
       setResult(res);
     },
     onError: (err) => {
+      const choice = tariffChoiceFromError(err);
+      if (choice) {
+        setTariffChoice(choice);
+        return;
+      }
       setClaimError(
         getLocalizedApiErrorMessage(
           err,
@@ -301,15 +315,23 @@ export default function GiftClaim() {
               onChange={(e) => {
                 setEmail(e.target.value);
                 setClaimError(null);
+                setTariffChoice(null);
               }}
               placeholder="email@example.com"
               className="w-full rounded-xl border border-dark-700/50 bg-dark-800/50 px-4 py-3 text-sm text-dark-50 placeholder-dark-500 outline-none focus:border-accent-500/50 focus:ring-1 focus:ring-accent-500/25"
             />
             {claimError && <p className="text-sm text-error-400">{claimError}</p>}
+            {tariffChoice && (
+              <TariffChoicePrompt
+                subscriptions={tariffChoice}
+                busy={claimMutation.isPending}
+                onAnswer={(answer) => claimMutation.mutate(answer)}
+              />
+            )}
             <button
               type="button"
               disabled={!isValidEmail(email) || claimMutation.isPending}
-              onClick={() => claimMutation.mutate()}
+              onClick={() => claimMutation.mutate(undefined)}
               className={cn(
                 'flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold transition-all',
                 isValidEmail(email) && !claimMutation.isPending

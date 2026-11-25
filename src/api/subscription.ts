@@ -109,6 +109,8 @@ export const subscriptionApi = {
     device_limit?: number;
     subscription_id?: number;
     payment_method: 'card' | 'sbp';
+    /** Мультитариф: ещё одна копия тарифа, который у пользователя уже есть. */
+    as_copy?: boolean;
   }): Promise<PayHotQuote> => {
     const { data } = await apiClient.post('/cabinet/subscription/payhot-recurrent/quote', body);
     return data;
@@ -154,6 +156,8 @@ export const subscriptionApi = {
     period_days: number;
     device_limit?: number;
     subscription_id?: number;
+    /** Мультитариф: ещё одна копия тарифа, который у пользователя уже есть. */
+    as_copy?: boolean;
   }): Promise<CisPayQuote> => {
     const { data } = await apiClient.post('/cabinet/subscription/cispay-recurrent/quote', body);
     return data;
@@ -560,6 +564,7 @@ export const subscriptionApi = {
     tariffId: number,
     subscriptionId?: number,
     selectedDeviceLimit?: number,
+    asCopy?: boolean,
   ): Promise<{
     amount_kopeks: number;
     charge_days: number;
@@ -574,6 +579,7 @@ export const subscriptionApi = {
       withSubId(subscriptionId, {
         tariff_id: tariffId,
         selected_device_limit: selectedDeviceLimit,
+        ...(asCopy && { as_copy: true }),
       }),
     );
     return response.data;
@@ -583,11 +589,16 @@ export const subscriptionApi = {
     tariffId: number,
     subscriptionId?: number,
     selection?: { selected_device_limit: number; quote_id: string; checkout_id: string },
+    asCopy?: boolean,
   ): Promise<{ status: string; redirect_url: string | null; subscription_id: number }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/platega-recurrent/purchase',
       {},
-      withSubId(subscriptionId, { tariff_id: tariffId, ...selection }),
+      withSubId(subscriptionId, {
+        tariff_id: tariffId,
+        ...selection,
+        ...(asCopy && { as_copy: true }),
+      }),
     );
     return response.data;
   },
@@ -628,11 +639,16 @@ export const subscriptionApi = {
     tariffId: number,
     subscriptionId?: number,
     selection?: { selected_device_limit: number; quote_id: string; checkout_id: string },
+    asCopy?: boolean,
   ): Promise<{ status: string; redirect_url: string | null; subscription_id: number }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/lava-recurrent/purchase',
       {},
-      withSubId(subscriptionId, { tariff_id: tariffId, ...selection }),
+      withSubId(subscriptionId, {
+        tariff_id: tariffId,
+        ...selection,
+        ...(asCopy && { as_copy: true }),
+      }),
     );
     return response.data;
   },
@@ -670,11 +686,16 @@ export const subscriptionApi = {
     tariffId: number,
     subscriptionId?: number,
     selection?: { selected_device_limit: number; quote_id: string; checkout_id: string },
+    asCopy?: boolean,
   ): Promise<{ status: string; redirect_url: string | null; subscription_id: number }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/cashera-recurrent/purchase',
       {},
-      withSubId(subscriptionId, { tariff_id: tariffId, ...selection }),
+      withSubId(subscriptionId, {
+        tariff_id: tariffId,
+        ...selection,
+        ...(asCopy && { as_copy: true }),
+      }),
     );
     return response.data;
   },
@@ -736,6 +757,8 @@ export const subscriptionApi = {
     traffic_gb?: number;
     subscription_id?: number;
     selected_device_limit?: number;
+    /** Мультитариф: ещё одна копия тарифа, который у пользователя уже есть. */
+    as_copy?: boolean;
   }): Promise<TariffDeviceQuote> => {
     const response = await apiClient.post(
       '/cabinet/subscription/purchase-tariff/preview',
@@ -758,6 +781,8 @@ export const subscriptionApi = {
     subscriptionId?: number,
     checkoutId?: string,
     devices?: { selected_device_limit: number; quote_id: string },
+    /** Мультитариф: ещё одна копия тарифа, который у пользователя уже есть. */
+    asCopy?: boolean,
   ): Promise<{
     success: boolean;
     already_processed?: boolean;
@@ -777,6 +802,7 @@ export const subscriptionApi = {
       subscription_id: subscriptionId,
       checkout_id: checkoutId,
       ...devices,
+      ...(asCopy && { as_copy: true }),
       yandex_cid: getYandexCid() || undefined,
     });
     return response.data;

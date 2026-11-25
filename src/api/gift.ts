@@ -1,4 +1,5 @@
 import apiClient from './client';
+import type { TariffChoiceAnswer } from '@/utils/tariffChoice';
 
 // Types
 
@@ -164,8 +165,19 @@ export const giftApi = {
     return data;
   },
 
-  activateGiftCode: async (code: string): Promise<ActivateGiftResponse> => {
-    const { data } = await apiClient.post<ActivateGiftResponse>('/cabinet/gift/activate', { code });
+  /**
+   * `ask_tariff_choice`: в мультитарифе, если тариф подарка уже есть, бэкенд
+   * отвечает 409 `tariff_choice_required`; повтор с `answer` активирует.
+   */
+  activateGiftCode: async (
+    code: string,
+    answer?: TariffChoiceAnswer,
+  ): Promise<ActivateGiftResponse> => {
+    const { data } = await apiClient.post<ActivateGiftResponse>('/cabinet/gift/activate', {
+      code,
+      ask_tariff_choice: true,
+      ...answer,
+    });
     return data;
   },
 };

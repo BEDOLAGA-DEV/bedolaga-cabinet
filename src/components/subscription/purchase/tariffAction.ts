@@ -19,11 +19,16 @@ export type TariffActionKind =
   | 'moveToTariff'
   /** Смена тарифа с пересчётом остатка. */
   | 'switch'
+  /**
+   * Мультитариф, витрина без выбранной подписки, тариф у человека уже есть:
+   * спросить, продлить имеющуюся подписку (какую) или купить ещё одну.
+   */
+  | 'chooseCopy'
   /** Обычная покупка. */
   | 'purchase';
 
 export interface TariffActionInput {
-  tariff: Pick<Tariff, 'id' | 'is_current'>;
+  tariff: Pick<Tariff, 'id' | 'is_current' | 'is_purchased'>;
   subscription: Subscription | null;
   purchaseOptions: PurchaseOptions | undefined;
   isTariffsMode: boolean;
@@ -45,6 +50,16 @@ export function tariffAction({
   isMultiTariff,
   subscriptionId,
 }: TariffActionInput): TariffActionKind {
+  // Бэкенд без копий тарифа флага не шлёт — тогда купленные тарифы прячутся, как раньше.
+  if (
+    isMultiTariff &&
+    subscriptionId === undefined &&
+    tariff.is_purchased &&
+    flag(purchaseOptions, 'tariff_copies_enabled')
+  ) {
+    return 'chooseCopy';
+  }
+
   const isCurrent = Boolean(tariff.is_current) || tariff.id === subscription?.tariff_id;
 
   if (isCurrent) {

@@ -1,4 +1,5 @@
 import apiClient from './client';
+import type { TariffChoiceAnswer } from '@/utils/tariffChoice';
 import type { AnimationConfig } from '@/components/ui/backgrounds/types';
 
 export interface LandingFeature {
@@ -302,8 +303,12 @@ export const landingApi = {
     return response.data;
   },
 
-  activatePurchase: async (token: string): Promise<PurchaseStatus> => {
-    const response = await apiClient.post(`/cabinet/landing/activate/${token}`);
+  /** См. `tariffChoiceFromError`: в мультитарифе может спросить, куда активировать. */
+  activatePurchase: async (token: string, answer?: TariffChoiceAnswer): Promise<PurchaseStatus> => {
+    const response = await apiClient.post(`/cabinet/landing/activate/${token}`, {
+      ask_tariff_choice: true,
+      ...answer,
+    });
     return response.data;
   },
 
@@ -314,8 +319,16 @@ export const landingApi = {
   },
 
   // Web (email) arm of the gift claim — binds the gift to the given email account.
-  claimGift: async (token: string, email: string): Promise<GiftClaimResult> => {
-    const response = await apiClient.post(`/cabinet/landing/gift/${token}/claim`, { email });
+  claimGift: async (
+    token: string,
+    email: string,
+    answer?: TariffChoiceAnswer,
+  ): Promise<GiftClaimResult> => {
+    const response = await apiClient.post(`/cabinet/landing/gift/${token}/claim`, {
+      email,
+      ask_tariff_choice: true,
+      ...answer,
+    });
     return response.data;
   },
 };

@@ -29,6 +29,7 @@ export function TariffPickerLite({
   subscriptionId,
   onSelectTariff,
   onSwitchTariff,
+  onChooseCopy = onSelectTariff,
 }: TariffPickerGridProps) {
   const { t } = useTranslation();
   const { formatAmount, currencySymbol } = useCurrency();
@@ -93,6 +94,11 @@ export function TariffPickerLite({
                     {t('lite.tariff.current', 'сейчас')}
                   </span>
                 )}
+                {action === 'chooseCopy' && (
+                  <span className="shrink-0 text-[13px] text-dark-400">
+                    {t('subscription.copies.owned')}
+                  </span>
+                )}
               </span>
               <span className="mt-1 block truncate text-[14px] text-dark-400">
                 {details(tariff)}
@@ -129,7 +135,11 @@ export function TariffPickerLite({
             key={tariff.id}
             type="button"
             onClick={() =>
-              action === 'switch' ? onSwitchTariff(tariff.id) : onSelectTariff(tariff)
+              action === 'switch'
+                ? onSwitchTariff(tariff.id)
+                : action === 'chooseCopy'
+                  ? onChooseCopy(tariff)
+                  : onSelectTariff(tariff)
             }
             className="flex w-full items-center justify-between gap-4 py-4 text-left transition-colors hover:text-dark-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-400"
           >

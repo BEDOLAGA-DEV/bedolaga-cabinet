@@ -15,6 +15,7 @@ import { TariffPurchaseForm } from '../components/subscription/purchase/TariffPu
 import { canOpenTariffSwitch, needsTariff } from '../utils/legacySubscription';
 import { TariffPickerGrid } from '../components/subscription/purchase/TariffPickerGrid';
 import { TariffPickerLite } from '../components/subscription/purchase/TariffPickerLite';
+import { TariffCopyChoiceSheet } from '../components/subscription/purchase/TariffCopyChoiceSheet';
 import { formatLiteDate } from '@/utils/liteDate';
 import { useLiteMode } from '../hooks/useLiteMode';
 import { ClassicPurchaseWizard } from '../components/subscription/purchase/ClassicPurchaseWizard';
@@ -70,6 +71,13 @@ export default function SubscriptionPurchase() {
     staleTime: 60_000,
   });
   const isMultiTariff = multiSubData?.multi_tariff_enabled ?? false;
+  // Бэкенд с копиями тарифа: купленный тариф можно купить ещё раз и перейти на него сменой.
+  const copiesEnabled = Boolean(
+    isTariffsMode &&
+      purchaseOptions &&
+      'tariff_copies_enabled' in purchaseOptions &&
+      purchaseOptions.tariff_copies_enabled,
+  );
 
   // (active promo discount + applyPromoDiscount live in usePromoDiscount;
   //  consumed directly by the sub-components, not threaded as props)
@@ -79,6 +87,9 @@ export default function SubscriptionPurchase() {
   // Tariffs mode state
   const [selectedTariff, setSelectedTariff] = useState<Tariff | null>(null);
   const [showTariffPurchase, setShowTariffPurchase] = useState(false);
+  // Тариф уже есть: окно «продлить имеющуюся или купить ещё одну» и ответ «ещё одну».
+  const [copyChoiceTariff, setCopyChoiceTariff] = useState<Tariff | null>(null);
+  const [buyAsCopy, setBuyAsCopy] = useState(false);
   // (selectedTariffPeriod / customDays / customTrafficGb / useCustomDays /
   //  useCustomTraffic moved into <TariffPurchaseForm>; form remounts with
   //  fresh state via key=tariff.id when the parent picks a new tariff)
@@ -94,6 +105,8 @@ export default function SubscriptionPurchase() {
     // setShowPurchaseForm moved into <ClassicPurchaseWizard>'s own useCloseOnSuccessNotification
     setShowTariffPurchase(false);
     setSwitchTariffId(null);
+    setCopyChoiceTariff(null);
+    setBuyAsCopy(false);
 
     setSelectedTariff(null);
     // (selectedTariffPeriod lives inside <TariffPurchaseForm> now; unmount clears it)
@@ -183,11 +196,14 @@ export default function SubscriptionPurchase() {
                 {t('subscription.switchTariff.chooseHint')}
               </p>
               {tariffs.some(
-                (tariff) => tariff.id !== subscription.tariff_id && !tariff.is_purchased,
+                (tariff) =>
+                  tariff.id !== subscription.tariff_id && (copiesEnabled || !tariff.is_purchased),
               ) ? (
                 <TariffPicker
                   tariffs={tariffs.filter(
-                    (tariff) => tariff.id !== subscription.tariff_id && !tariff.is_purchased,
+                    (tariff) =>
+                      tariff.id !== subscription.tariff_id &&
+                      (copiesEnabled || !tariff.is_purchased),
                   )}
                   subscription={subscription}
                   purchaseOptions={purchaseOptions}
@@ -371,32 +387,43 @@ export default function SubscriptionPurchase() {
               isMultiTariff={isMultiTariff}
               subscriptionId={subscriptionId}
               onSelectTariff={(tariff) => {
+                setBuyAsCopy(false);
                 setSelectedTariff(tariff);
                 setShowTariffPurchase(true);
               }}
               onSwitchTariff={(tariffId) => setSwitchTariffId(tariffId)}
+              onChooseCopy={setCopyChoiceTariff}
             />
           ) : (
             selectedTariff && (
               /* Tariff Purchase Form (extracted into its own component) */
               <TariffPurchaseForm
-                key={selectedTariff.id}
+                key={`${selectedTariff.id}:${buyAsCopy}`}
+                asCopy={buyAsCopy}
                 payhotPurchaseEnabled={purchaseOptions?.payhot_recurrent_enabled === true}
                 payhotMethods={purchaseOptions?.payhot_recurrent_methods ?? []}
-                payhotSubscriptionId={resolvePayHotTarget(
-                  subscriptionId,
-                  subscription,
-                  selectedTariff.id,
-                  isMultiTariff,
-                )}
-                cispaySubscriptionId={resolveCisPayTarget(
-                  subscriptionId,
-                  subscription,
-                  selectedTariff.id,
-                  isMultiTariff,
-                )}
+                payhotSubscriptionId={
+                  buyAsCopy
+                    ? undefined
+                    : resolvePayHotTarget(
+                        subscriptionId,
+                        subscription,
+                        selectedTariff.id,
+                        isMultiTariff,
+                      )
+                }
+                cispaySubscriptionId={
+                  buyAsCopy
+                    ? undefined
+                    : resolveCisPayTarget(
+                        subscriptionId,
+                        subscription,
+                        selectedTariff.id,
+                        isMultiTariff,
+                      )
+                }
                 tariff={selectedTariff}
-                subscriptionId={subscriptionId}
+                subscriptionId={buyAsCopy ? undefined : subscriptionId}
                 balanceKopeks={purchaseOptions?.balance_kopeks}
                 sbpPurchaseEnabled={
                   isTariffsMode &&
@@ -424,9 +451,25 @@ export default function SubscriptionPurchase() {
                 onBack={() => {
                   setShowTariffPurchase(false);
                   setSelectedTariff(null);
+                  setBuyAsCopy(false);
                 }}
               />
             )
+          )}
+
+          {/* Монтируется только открытым: витрина без купленных тарифов его не платит. */}
+          {copyChoiceTariff && (
+            <TariffCopyChoiceSheet
+              tariff={copyChoiceTariff}
+              subscriptions={multiSubData?.subscriptions}
+              onClose={() => setCopyChoiceTariff(null)}
+              onBuyAnother={(tariff) => {
+                setCopyChoiceTariff(null);
+                setBuyAsCopy(true);
+                setSelectedTariff(tariff);
+                setShowTariffPurchase(true);
+              }}
+            />
           )}
         </div>
       )}
