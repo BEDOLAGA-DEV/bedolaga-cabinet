@@ -11,7 +11,12 @@ import { DEFAULT_THEME_COLORS } from '@/types/theme';
  * что заголовок и фавикон ставил только AppShell после логина.
  */
 
-const NO_LOGO = { name: 'ZeroPing', logo_url: null, logo_letter: 'Z', has_custom_logo: false };
+const NO_LOGO = {
+  name: 'ZeroPing',
+  logo_url: null,
+  logo_letter: 'Z',
+  has_custom_logo: false,
+};
 const WITH_LOGO = {
   name: 'ZeroPing',
   logo_url: '/cabinet/branding/logo',
@@ -57,7 +62,10 @@ vi.mock('@/api/themeColors', () => {
       getColors,
       getEnabledThemes: () => Promise.resolve({ dark: true, light: true }),
     },
-    themeColorsQueryOptions: () => ({ queryKey: ['theme-colors'], queryFn: getColors }),
+    themeColorsQueryOptions: () => ({
+      queryKey: ['theme-colors'],
+      queryFn: getColors,
+    }),
   };
 });
 
@@ -104,7 +112,7 @@ async function renderBranding() {
 }
 
 describe('DocumentBranding', () => {
-  it('ставит заголовок, имя приложения, фавикон и манифест из брендинга', async () => {
+  it('ставит заголовок, имя приложения и манифест из брендинга, фавикон не трогает', async () => {
     await renderBranding();
 
     await waitFor(() => expect(document.title).toBe('ZeroPing'));
@@ -115,12 +123,9 @@ describe('DocumentBranding', () => {
       document.querySelector('meta[name="apple-mobile-web-app-title"]')?.getAttribute('content'),
     ).toBe('ZeroPing');
 
-    await waitFor(() => {
-      const href = document.querySelector('link[rel="icon"]')?.getAttribute('href') ?? '';
-      // Монограмма буквы Z в цвете акцента инсталляции, а не статический «V».
-      expect(decodeURIComponent(href)).toContain('>Z</text>');
-      expect(decodeURIComponent(href)).toContain('fill="#22c55e"');
-    });
+    // Фавикон захардкожен в index.html (иконки лендинга) — хук его не трогает.
+    await waitFor(() => expect(localStorage.getItem(STORAGE_KEYS.BRAND_HINT)).not.toBeNull());
+    expect(document.querySelector('link[rel="icon"]')?.getAttribute('href')).toBe(STATIC_ICON);
 
     const manifestHref = document.querySelector('link[rel="manifest"]')?.getAttribute('href') ?? '';
     const manifest = JSON.parse(
@@ -150,21 +155,14 @@ describe('DocumentBranding', () => {
     expect(links[0].getAttribute('href')).toBe(manifestUrl);
   });
 
-  it('вкладке — плитка как в шапке, подсказке для Safari — с меньшим скруглением', async () => {
-    // Safari в тёмной теме подрисовывает иконке с прозрачными углами белую
-    // плитку-подложку, если скругление заметное: при 0,16 стороны и больше
-    // подложка есть, при 0,12 — нет (Safari 26.6, замерено). Chrome ставит
-    // иконку из React и подсказку видит доли секунды, Safari — только подсказку.
+  it('фавикон вкладки не подменяет, подсказке для Safari — плитка с меньшим скруглением', async () => {
     canvasMode.enabled = true;
     backend.branding = WITH_LOGO;
     backend.blobUrl = 'blob:logo';
     await renderBranding();
 
-    await waitFor(() =>
-      expect(document.querySelector('link[rel="icon"]')?.getAttribute('href')).toBe(
-        'data:image/png;base64,r0.3',
-      ),
-    );
+    await waitFor(() => expect(localStorage.getItem(STORAGE_KEYS.BRAND_HINT)).not.toBeNull());
+    expect(document.querySelector('link[rel="icon"]')?.getAttribute('href')).toBe(STATIC_ICON);
     const hint = JSON.parse(localStorage.getItem(STORAGE_KEYS.BRAND_HINT) ?? 'null');
     expect(hint.icon).toBe('data:image/png;base64,r0.12');
   });

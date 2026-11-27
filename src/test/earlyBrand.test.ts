@@ -94,7 +94,9 @@ describe('ранний бренд из index.html', () => {
     runScript();
     await settle();
 
-    expect(fetch).toHaveBeenCalledWith(`${API}/cabinet/branding`, { credentials: 'omit' });
+    expect(fetch).toHaveBeenCalledWith(`${API}/cabinet/branding`, {
+      credentials: 'omit',
+    });
     expect(document.title).toBe('ZeroPing');
     expect(metaContent('application-name')).toBe('ZeroPing');
     expect(metaContent('apple-mobile-web-app-title')).toBe('ZeroPing');
@@ -122,7 +124,8 @@ describe('ранний бренд из index.html', () => {
     });
   });
 
-  it('подсказку прошлого визита применяет синхронно, включая PNG-иконку', async () => {
+  it('подсказку прошлого визита применяет синхронно, но иконку из неё не ставит', async () => {
+    // Фавикон захардкожен в index.html (иконки лендинга) — PNG из подсказки его не подменяет.
     const icon = 'data:image/png;base64,hint';
     localStorage.setItem(
       'cabinet-brand-hint',
@@ -132,12 +135,11 @@ describe('ранний бренд из index.html', () => {
 
     runScript();
     expect(document.title).toBe('ZeroPing');
-    expect(iconHref()).toBe(icon);
+    expect(iconHref()).toBe(STATIC_ICON);
 
     await settle();
     expect(document.title).toBe('ZeroPing VPN');
-    expect(iconHref()).toBe(icon);
-    expect(JSON.parse(localStorage.getItem('cabinet-brand-hint') ?? 'null').icon).toBe(icon);
+    expect(iconHref()).toBe(STATIC_ICON);
   });
 
   it('SVG-иконку из подсказки не применяет: ссылка на эндпоинт бота остаётся', () => {
@@ -146,7 +148,11 @@ describe('ранний бренд из index.html', () => {
     // логотипа навсегда: до эндпоинта бота он уже не доходил.
     localStorage.setItem(
       'cabinet-brand-hint',
-      JSON.stringify({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/svg+xml,%3Csvg%3E' }),
+      JSON.stringify({
+        name: 'ZeroPing',
+        letter: 'Z',
+        icon: 'data:image/svg+xml,%3Csvg%3E',
+      }),
     );
     vi.stubGlobal('fetch', fetchReturning(LOGO_BRAND));
 
