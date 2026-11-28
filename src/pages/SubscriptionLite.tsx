@@ -13,7 +13,7 @@ import { LiteMeter } from '@/components/lite/LiteMeter';
 import { LiteRow, LiteRowGroup } from '@/components/lite/LiteRow';
 import { AutopayToggle } from '@/components/subscription/manage/AutopayToggle';
 import { DailyPausePanel } from '@/components/subscription/manage/DailyPausePanel';
-import { DevicesPanel } from '@/components/subscription/manage/DevicesPanel';
+import { DeviceCards as DevicesPanel } from '@/components/subscription/manage/DeviceCards';
 import { RecurringPanels } from '@/components/subscription/manage/RecurringPanels';
 import {
   canReissueLink,

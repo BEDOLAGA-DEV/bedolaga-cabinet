@@ -1,4 +1,15 @@
 {
+  "deviceCards": {
+    "countOf": "{{used}} из {{limit}}",
+    "countUnlimited": "{{count}} · без ограничений",
+    "added": "Добавлено {{date}}",
+    "connectFirst": "Подключить первое устройство",
+    "connectMore": "Подключить устройство",
+    "freeSlots": "Свободно мест: {{count}}",
+    "freeUnlimited": "Без ограничения по количеству",
+    "limitReached": "Все места заняты. Чтобы подключить новое устройство, удалите старое.",
+    "deleteAll": "Удалить все ({{count}})"
+  },
   "common": {
     "all": "Все",
     "loading": "Загрузка...",

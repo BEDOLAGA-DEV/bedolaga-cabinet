@@ -1,4 +1,15 @@
 {
+  "deviceCards": {
+    "countOf": "{{used}} از {{limit}}",
+    "countUnlimited": "{{count}} · نامحدود",
+    "added": "افزوده شده در {{date}}",
+    "connectFirst": "اتصال اولین دستگاه",
+    "connectMore": "اتصال دستگاه",
+    "freeSlots": "جای خالی: {{count}}",
+    "freeUnlimited": "بدون محدودیت تعداد دستگاه",
+    "limitReached": "همه جاها پر است. برای اتصال دستگاه جدید، یک دستگاه قدیمی را حذف کنید.",
+    "deleteAll": "حذف همه ({{count}})"
+  },
   "common": {
     "loading": "در حال بارگذاری...",
     "all": "همه",

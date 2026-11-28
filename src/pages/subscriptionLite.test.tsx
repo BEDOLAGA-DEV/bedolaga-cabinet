@@ -69,6 +69,9 @@ vi.mock('@/components/subscription/manage/AutopayToggle', () => ({
 vi.mock('@/components/subscription/manage/RecurringPanels', () => ({
   RecurringPanels: () => <div data-testid="recurring">автосписания</div>,
 }));
+vi.mock('@/components/subscription/manage/DeviceCards', () => ({
+  DeviceCards: () => <div data-testid="devices-list">список устройств</div>,
+}));
 vi.mock('@/components/subscription/manage/DevicesPanel', () => ({
   DevicesPanel: () => <div data-testid="devices-list">список устройств</div>,
 }));

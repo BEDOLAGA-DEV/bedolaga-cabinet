@@ -1,4 +1,15 @@
 {
+  "deviceCards": {
+    "countOf": "{{used}} of {{limit}}",
+    "countUnlimited": "{{count}} · unlimited",
+    "added": "Added {{date}}",
+    "connectFirst": "Connect your first device",
+    "connectMore": "Connect a device",
+    "freeSlots": "Free slots: {{count}}",
+    "freeUnlimited": "No limit on the number of devices",
+    "limitReached": "All slots are taken. To connect a new device, remove an old one.",
+    "deleteAll": "Remove all ({{count}})"
+  },
   "common": {
     "loading": "Loading...",
     "error": "Error",

@@ -41,7 +41,7 @@ import {
   canReissueLink,
   ReissueLinkButton,
 } from '../components/subscription/manage/ReissueLinkButton';
-import { DevicesPanel } from '../components/subscription/manage/DevicesPanel';
+import { DeviceCards as DevicesPanel } from '../components/subscription/manage/DeviceCards';
 import { RecurringPanels } from '../components/subscription/manage/RecurringPanels';
 import { DeviceTopupSheet } from '../components/subscription/sheets/DeviceTopupSheet';
 import { DeviceReductionSheet } from '../components/subscription/sheets/DeviceReductionSheet';
@@ -1121,15 +1121,8 @@ export default function Subscription() {
 
       {/* My Devices Section */}
       {subscription && (
-        <div
-          className="relative overflow-hidden rounded-3xl"
-          style={{
-            background: g.cardBg,
-            border: `1px solid ${g.cardBorder}`,
-            boxShadow: g.shadow,
-            padding: '24px 28px',
-          }}
-        >
+        // Без внешней карточки: каждое устройство уже карточка, вложенность лишняя.
+        <div className="px-1">
           <DevicesPanel subscription={subscription} subscriptionId={subscriptionId} />
         </div>
       )}

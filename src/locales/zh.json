@@ -1,4 +1,15 @@
 {
+  "deviceCards": {
+    "countOf": "{{used}} / {{limit}}",
+    "countUnlimited": "{{count}} · 不限数量",
+    "added": "添加于 {{date}}",
+    "connectFirst": "连接第一台设备",
+    "connectMore": "连接设备",
+    "freeSlots": "剩余名额：{{count}}",
+    "freeUnlimited": "设备数量不限",
+    "limitReached": "名额已满。要连接新设备，请先删除旧设备。",
+    "deleteAll": "全部删除（{{count}}）"
+  },
   "common": {
     "loading": "加载中...",
     "error": "错误",
