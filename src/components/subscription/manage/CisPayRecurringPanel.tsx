@@ -1,27 +1,55 @@
 import { formatCisPayCharge } from '@/utils/cispayRecurring';
-import { Link } from 'react-router';
+import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { subscriptionApi } from '../../../api/subscription';
 import { usePlatform } from '../../../platform';
 import { openPaymentUrl } from '../../../utils/openPaymentUrl';
-import { canCancelCisPay, isCisPayTransition } from '../../../utils/cispayRecurring';
+import {
+  canCancelCisPay,
+  cisPayPeriodOptions,
+  isCisPayTransition,
+  type CisPaySetupTariff,
+} from '../../../utils/cispayRecurring';
+import { CisPayPurchaseButton } from '../purchase/CisPayPurchaseButton';
 
 export function CisPayRecurringPanel({
   subscriptionId,
   adminUserId,
   canManage = true,
-  canSetup = false,
+  setupTariff,
 }: {
   subscriptionId: number;
   adminUserId?: number;
   canManage?: boolean;
-  canSetup?: boolean;
+  /** Current tariff of the subscription; set only when the customer may connect CisPay. */
+  setupTariff?: CisPaySetupTariff & { id: number };
 }) {
   const { t, i18n } = useTranslation();
   const { platform, openLink } = usePlatform();
   const client = useQueryClient();
+  // Setup stays on this page: the purchase page opens tariff switching for an
+  // active subscription and hides its current tariff, so it can't renew it.
+  // Devices are not sent: the backend keeps the paid subscription's own limit.
+  const options = cisPayPeriodOptions(setupTariff);
+  const custom = options.custom;
+  const canSetup = !adminUserId && canManage && (options.periods.length > 0 || custom !== null);
+  const [chosenDays, setChosenDays] = useState<number | undefined>();
+  // Raw text while typing, so «30» can be entered although «3» is below the minimum.
+  const [customText, setCustomText] = useState<string | null>(null);
+  const isOffered = (days: number) =>
+    options.periods.includes(days) || (custom !== null && days >= custom.min && days <= custom.max);
+  const periodDays =
+    chosenDays !== undefined && isOffered(chosenDays)
+      ? chosenDays
+      : (options.periods[0] ?? custom?.min);
+  const invalidCustom =
+    customText !== null &&
+    (!/^\d+$/.test(customText) ||
+      !custom ||
+      Number(customText) < custom.min ||
+      Number(customText) > custom.max);
   const query = useQuery({
     queryKey: ['cispay-recurring', subscriptionId, adminUserId],
     queryFn: () => subscriptionApi.getCisPayRecurring(subscriptionId, adminUserId),
@@ -81,15 +109,69 @@ export function CisPayRecurringPanel({
           })}
         </p>
       )}
+      {setupTariff && canSetup && !canCancelCisPay(info.status) && (
+        <fieldset className="min-w-0 space-y-2">
+          <legend className="text-sm text-dark-300">
+            {t('subscription.cispayRecurring.period')}
+          </legend>
+          <div className="flex flex-wrap gap-2">
+            {options.periods.map((days) => (
+              <button
+                key={days}
+                type="button"
+                aria-pressed={periodDays === days}
+                className={periodDays === days ? 'btn-primary' : 'btn-secondary'}
+                onClick={() => {
+                  setChosenDays(days);
+                  setCustomText(null);
+                }}
+              >
+                {t('subscription.days', { count: days })}
+              </button>
+            ))}
+            {custom && (
+              <label className="flex w-full min-w-0 items-center justify-between gap-3 text-sm text-dark-300">
+                <span className="min-w-0 break-words">
+                  {t('subscription.customDays.title')}
+                  <span className="block whitespace-nowrap tabular-nums text-dark-400">
+                    {custom.min}–{custom.max}
+                  </span>
+                </span>
+                <input
+                  type="number"
+                  value={customText ?? periodDays ?? custom.min}
+                  inputMode="numeric"
+                  step={1}
+                  aria-invalid={invalidCustom}
+                  min={custom.min}
+                  max={custom.max}
+                  aria-label={t('subscription.customDays.title')}
+                  onChange={(e) => {
+                    setCustomText(e.target.value);
+                    const days = Number(e.target.value);
+                    if (
+                      /^\d+$/.test(e.target.value) &&
+                      Number.isInteger(days) &&
+                      days >= custom.min &&
+                      days <= custom.max
+                    )
+                      setChosenDays(days);
+                  }}
+                  onBlur={() => setCustomText(null)}
+                  className="w-20 shrink-0 rounded-lg border border-dark-600 bg-dark-900/50 px-3 py-2 text-center tabular-nums text-dark-100 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+                />
+              </label>
+            )}
+          </div>
+          <CisPayPurchaseButton
+            tariffId={setupTariff.id}
+            subscriptionId={subscriptionId}
+            periodDays={periodDays}
+            disabled={invalidCustom}
+          />
+        </fieldset>
+      )}
       <div className="flex flex-wrap gap-2">
-        {canSetup && !canCancelCisPay(info.status) && (
-          <Link
-            className="btn-secondary whitespace-normal"
-            to={`/subscription/purchase?subscriptionId=${subscriptionId}`}
-          >
-            {t('subscription.cispayRecurring.setup')}
-          </Link>
-        )}
         {!adminUserId && info.status === 'PENDING' && info.redirect_url && (
           <button
             type="button"

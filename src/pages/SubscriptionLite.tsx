@@ -1,3 +1,6 @@
+import { useAuthStore } from '@/store/auth';
+import { useSubscriptionMirror } from '@/hooks/useSubscriptionMirror';
+import { MirrorSelector } from '@/components/connection/MirrorSelector';
 import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
 import ManagedTrafficSummary from '@/components/subscription/ManagedTrafficSummary';
 import { useEffect, useMemo, useState } from 'react';
@@ -55,6 +58,7 @@ type OpenPanel = 'traffic' | 'devices' | 'reduce' | 'servers' | 'devicesList' | 
  * что ничего не становится недоступным.
  */
 export default function SubscriptionLite() {
+  const userId = useAuthStore((state) => state.user?.id);
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { subscriptionId: rawId } = useParams();
@@ -74,7 +78,7 @@ export default function SubscriptionLite() {
     isError,
     refetch,
   } = useQuery({
-    queryKey: ['subscription', subscriptionId],
+    queryKey: ['subscription', subscriptionId, userId],
     queryFn: () => subscriptionApi.getSubscription(subscriptionId),
     retry: false,
     staleTime: 0,
@@ -97,12 +101,12 @@ export default function SubscriptionLite() {
   // Ссылка подписки — та же, что показывает полная страница: иначе в простом
   // виде её не было нигде, и человеку без приложения-импортёра нечего вставить.
   const { data: connectionLink, isLoading: isConnectionLinkLoading } = useQuery({
-    queryKey: ['connection-link', subscriptionId],
+    queryKey: ['connection-link', subscriptionId, userId],
     queryFn: () => subscriptionApi.getConnectionLink(subscriptionId),
     enabled: Boolean(subscription),
     retry: false,
   });
-  const connectionUrl = useMemo(
+  const canonicalConnectionUrl = useMemo(
     () =>
       resolveConnectionUrlForUi({
         mode: connectionLink?.connect_mode,
@@ -116,6 +120,12 @@ export default function SubscriptionLite() {
       }),
     [connectionLink, isConnectionLinkLoading, subscription?.subscription_url],
   );
+  const mirrorSelection = useSubscriptionMirror(
+    connectionLink,
+    canonicalConnectionUrl,
+    Boolean(subscription?.hide_subscription_link),
+  );
+  const connectionUrl = mirrorSelection.url;
   const hidesLink = Boolean(subscription?.hide_subscription_link || connectionLink?.hide_link);
   const [copied, setCopied] = useState(false);
   useEffect(() => {
@@ -205,6 +215,7 @@ export default function SubscriptionLite() {
         {t('lite.action.connect')}
       </Link>
 
+      <MirrorSelector selection={mirrorSelection} />
       <div className="mt-6">
         <LiteRowGroup>
           {subscription.is_trial ? (

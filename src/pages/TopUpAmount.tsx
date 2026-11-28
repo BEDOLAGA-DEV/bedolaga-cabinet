@@ -1,3 +1,7 @@
+import PaymentPhoneInput, {
+  requiresPaymentPhone,
+  isValidPaymentPhone,
+} from '@/components/PaymentPhoneInput';
 import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -149,6 +153,11 @@ export default function TopUpAmount() {
   const [selectedOption, setSelectedOption] = useState<string | null>(
     getPreferredOptionId(method?.options),
   );
+  const [paymentPhone, setPaymentPhone] = useState('');
+  const needsPaymentPhone = requiresPaymentPhone(method?.id, selectedOption);
+  useEffect(() => {
+    setPaymentPhone('');
+  }, [method?.id, selectedOption]);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [qrPayload, setQrPayload] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -237,6 +246,14 @@ export default function TopUpAmount() {
           customerEmail.trim(),
         );
       }
+      if (needsPaymentPhone)
+        return balanceApi.createTopUp(
+          amountKopeks,
+          method.id,
+          selectedOption || undefined,
+          undefined,
+          paymentPhone.trim(),
+        );
       return balanceApi.createTopUp(amountKopeks, method.id, selectedOption || undefined);
     },
     onSuccess: (data) => {
@@ -343,6 +360,10 @@ export default function TopUpAmount() {
     setPaymentUrl(null);
     setQrPayload(null);
     inputRef.current?.blur();
+    if (needsPaymentPhone && !isValidPaymentPhone(paymentPhone)) {
+      setError(t('balance.paymentPhoneInvalid'));
+      return;
+    }
     if (
       method.id === 'antilopay' &&
       (!customerEmail.trim() || !emailRef.current?.checkValidity())
@@ -501,6 +522,8 @@ export default function TopUpAmount() {
         </motion.div>
       )}
 
+      {needsPaymentPhone && <PaymentPhoneInput value={paymentPhone} onChange={setPaymentPhone} />}
+
       {method.id === 'antilopay' && (
         <motion.div variants={staggerItem} className="space-y-2">
           <label htmlFor="payment-email" className="text-sm font-medium text-dark-400">
@@ -604,6 +627,10 @@ export default function TopUpAmount() {
                   setAmount(val);
                   setQuickRub(a);
                   inputRef.current?.blur();
+                  if (needsPaymentPhone && !isValidPaymentPhone(paymentPhone)) {
+                    setError(t('balance.paymentPhoneInvalid'));
+                    return;
+                  }
                   if (
                     method.id === 'antilopay' &&
                     (!customerEmail.trim() || !emailRef.current?.checkValidity())

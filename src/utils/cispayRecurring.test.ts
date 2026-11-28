@@ -42,40 +42,74 @@ it('targets the existing single subscription but never an implicit multi subscri
 });
 
 it('only offers setup for a purchasable supported period, including custom days', async () => {
-  const { canSetupCisPayTariff } = await import('./cispayRecurring');
+  const { cisPaySetupTariff } = await import('./cispayRecurring');
   const tariff = {
+    id: 9,
     is_daily: false,
     is_available: true,
     periods: [{ days: 365, price_kopeks: 10000 }],
   };
-  expect(canSetupCisPayTariff(tariff)).toBe(false);
-  expect(canSetupCisPayTariff({ ...tariff, periods: [{ days: 30, price_kopeks: 1000 }] })).toBe(
-    true,
-  );
+  const sub = { tariff_id: 9, status: 'active' };
+  const setup = (t: typeof tariff & Record<string, unknown>) =>
+    cisPaySetupTariff({ sales_mode: 'tariffs', cispay_recurrent_enabled: true, tariffs: [t] }, sub);
+  expect(setup(tariff)).toBeUndefined();
+  const monthly = { ...tariff, periods: [{ days: 30, price_kopeks: 1000 }] };
+  expect(setup(monthly)).toBe(monthly);
+  expect(setup({ ...monthly, is_daily: true })).toBeUndefined();
   expect(
-    canSetupCisPayTariff({
-      ...tariff,
-      is_daily: true,
-      periods: [{ days: 30, price_kopeks: 1000 }],
-    }),
-  ).toBe(false);
-  expect(
-    canSetupCisPayTariff({
+    setup({
       ...tariff,
       custom_days_enabled: true,
       price_per_day_kopeks: 100,
       min_days: 1,
       max_days: 10000,
     }),
-  ).toBe(true);
+  ).toBeDefined();
   expect(
-    canSetupCisPayTariff({
+    setup({
       ...tariff,
       custom_days_enabled: true,
       price_per_day_kopeks: 100,
       min_days: 365,
       max_days: 10000,
     }),
-  ).toBe(false);
-  expect(canSetupCisPayTariff(undefined)).toBe(false);
+  ).toBeUndefined();
+});
+
+it('ties setup to tariffs mode, the CisPay switch and a live subscription', async () => {
+  const { cisPaySetupTariff } = await import('./cispayRecurring');
+  const tariff = { id: 9, periods: [{ days: 30, price_kopeks: 1000 }] };
+  const options = { sales_mode: 'tariffs', cispay_recurrent_enabled: true, tariffs: [tariff] };
+  const sub = { tariff_id: 9, status: 'active' };
+  expect(cisPaySetupTariff(options, sub)).toBe(tariff);
+  expect(cisPaySetupTariff({ ...options, cispay_recurrent_enabled: false }, sub)).toBeUndefined();
+  expect(cisPaySetupTariff({ ...options, sales_mode: 'classic' }, sub)).toBeUndefined();
+  expect(cisPaySetupTariff(options, { ...sub, status: 'disabled' })).toBeUndefined();
+  expect(cisPaySetupTariff(options, { ...sub, tariff_id: 10 })).toBeUndefined();
+  expect(cisPaySetupTariff(undefined, sub)).toBeUndefined();
+});
+
+it('lists supported fixed periods and clamps custom days to the CisPay range', async () => {
+  const { cisPayPeriodOptions } = await import('./cispayRecurring');
+  expect(
+    cisPayPeriodOptions({
+      periods: [
+        { days: 3, price_kopeks: 100 },
+        { days: 30, price_kopeks: 1000 },
+        { days: 90, price_kopeks: 0 },
+        { days: 365, price_kopeks: 10000 },
+      ],
+    }),
+  ).toEqual({ periods: [30], custom: null });
+  expect(
+    cisPayPeriodOptions({
+      custom_days_enabled: true,
+      price_per_day_kopeks: 100,
+      min_days: 1,
+      max_days: 10000,
+    }),
+  ).toEqual({ periods: [], custom: { min: 7, max: 360 } });
+  expect(
+    cisPayPeriodOptions({ is_available: false, periods: [{ days: 30, price_kopeks: 1000 }] }),
+  ).toEqual({ periods: [], custom: null });
 });

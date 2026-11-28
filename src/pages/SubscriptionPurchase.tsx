@@ -1,3 +1,4 @@
+import { resolvePayHotTarget } from '@/utils/payhotRecurring';
 import { resolveCisPayTarget } from '@/utils/cispayRecurring';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -380,6 +381,14 @@ export default function SubscriptionPurchase() {
               /* Tariff Purchase Form (extracted into its own component) */
               <TariffPurchaseForm
                 key={selectedTariff.id}
+                payhotPurchaseEnabled={purchaseOptions?.payhot_recurrent_enabled === true}
+                payhotMethods={purchaseOptions?.payhot_recurrent_methods ?? []}
+                payhotSubscriptionId={resolvePayHotTarget(
+                  subscriptionId,
+                  subscription,
+                  selectedTariff.id,
+                  isMultiTariff,
+                )}
                 cispaySubscriptionId={resolveCisPayTarget(
                   subscriptionId,
                   subscription,

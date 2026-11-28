@@ -190,10 +190,13 @@ export default function TopUpResult() {
 
   // Detect if user arrived via redirect with success param (no polling needed)
   const redirectStatus = searchParams.get('status') || searchParams.get('payment');
-  const isRedirectSuccess = redirectStatus
-    ? isPaidStatus(redirectStatus)
-    : searchParams.get('success') === 'true';
-  const isRedirectFailed = redirectStatus ? isFailedStatus(redirectStatus) : false;
+  // HOT Pay return URLs are navigation only; payment truth comes from the server.
+  const requiresVerifiedStatus = pendingInfo?.method_id === 'payhot' || methodFromUrl === 'payhot';
+  const isRedirectSuccess =
+    !requiresVerifiedStatus &&
+    (redirectStatus ? isPaidStatus(redirectStatus) : searchParams.get('success') === 'true');
+  const isRedirectFailed =
+    !requiresVerifiedStatus && (redirectStatus ? isFailedStatus(redirectStatus) : false);
 
   // Determine if we can poll by specific payment_id (need method + numeric payment_id)
   const parsedPaymentId = pendingInfo?.payment_id ? parseInt(pendingInfo.payment_id, 10) : NaN;

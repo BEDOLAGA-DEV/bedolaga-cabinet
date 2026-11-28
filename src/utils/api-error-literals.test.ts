@@ -35,7 +35,7 @@ async function translator(language: keyof typeof resources) {
 }
 
 it('keeps unique exact purchase mappings separate from authentication mappings', () => {
-  expect(PURCHASE_ERROR_LITERAL_KEYS).toHaveLength(189);
+  expect(PURCHASE_ERROR_LITERAL_KEYS).toHaveLength(190);
   const entries = [...PURCHASE_ERROR_LITERAL_KEYS, ...AUTH_ERROR_LITERAL_KEYS];
   expect(new Set(entries.map(([literal]) => literal)).size).toBe(entries.length);
   expect(new Set(entries.map(([, key]) => key)).size).toBe(entries.length);
@@ -130,4 +130,12 @@ it('falls back to the raw literal when a locale resource is missing', async () =
   expect(getLocalizedApiErrorMessage(error('Failed to charge balance'), 'fallback', i18n.t)).toBe(
     'Failed to charge balance',
   );
+});
+
+it('does not present a confirmed preflight refusal as an uncertain charge', () => {
+  const response = error(
+    'Traffic purchase was not applied. No funds were charged. Please try again.',
+    409,
+  );
+  expect(isUncertainPurchaseOutcome(response)).toBe(false);
 });

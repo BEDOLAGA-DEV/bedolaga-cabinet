@@ -1,6 +1,10 @@
 // Exact cabinet-owned HTTPException.detail messages, reviewed against backend sources.
 // Display only: never use localized text to classify or retry an operation.
 export const PURCHASE_ERROR_LITERAL_KEYS: readonly (readonly [string, string])[] = [
+  [
+    'Traffic purchase was not applied. No funds were charged. Please try again.',
+    'trafficPurchaseNotApplied',
+  ],
   ['Apple In-App Purchase is not enabled or not fully configured', 'purchase001'],
   ['Too many Apple purchase verification attempts', 'purchase002'],
   ['User not found', 'purchase003'],

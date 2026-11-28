@@ -1,5 +1,7 @@
+import { PayHotRecurringPanel } from './PayHotRecurringPanel';
+import { payHotSetupTariff } from '@/utils/payhotRecurring';
 import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
-import { canSetupCisPayTariff } from '@/utils/cispayRecurring';
+import { cisPaySetupTariff } from '@/utils/cispayRecurring';
 import { CisPayRecurringPanel } from './CisPayRecurringPanel';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -293,16 +295,14 @@ export function RecurringPanels({ subscription, subscriptionId }: RecurringPanel
 
   return (
     <>
+      <PayHotRecurringPanel
+        key={subscription.id}
+        subscriptionId={subscription.id}
+        setupTariff={payHotSetupTariff(purchaseOptions, subscription)}
+      />
       <CisPayRecurringPanel
         subscriptionId={subscription.id}
-        canSetup={
-          purchaseOptions?.sales_mode === 'tariffs' &&
-          !!purchaseOptions.cispay_recurrent_enabled &&
-          subscription.status !== 'disabled' &&
-          canSetupCisPayTariff(
-            purchaseOptions.tariffs.find((tariff) => tariff.id === subscription.tariff_id),
-          )
-        }
+        setupTariff={cisPaySetupTariff(purchaseOptions, subscription)}
       />
       {/* ─── SBP Recurring Auto-payment ───
            Sibling of the autopay toggle above, guarded ONLY by

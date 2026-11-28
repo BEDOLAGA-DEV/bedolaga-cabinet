@@ -50,6 +50,7 @@ export interface GiftConfig {
 }
 
 export interface GiftPurchaseRequest {
+  payment_phone?: string;
   tariff_id: number;
   period_days: number;
   recipient_type?: 'email' | 'telegram';

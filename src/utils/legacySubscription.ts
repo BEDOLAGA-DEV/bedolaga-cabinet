@@ -29,16 +29,25 @@ export function tariffSelectionPath(subscriptionId: number): string {
   return `/subscription/purchase?subscriptionId=${subscriptionId}`;
 }
 
-/** Прямой вход в смену: сервер принимает только активную платную тарифную подписку. */
+/** Смена оплаченного тарифа доступна и при исчерпанном трафике, пока действует срок. */
 export function canOpenTariffSwitch(
   subscription:
-    | Pick<Subscription, 'tariff_id' | 'is_active' | 'is_trial' | 'requires_tariff_selection'>
+    | Pick<
+        Subscription,
+        | 'tariff_id'
+        | 'is_active'
+        | 'is_trial'
+        | 'is_limited'
+        | 'end_date'
+        | 'requires_tariff_selection'
+      >
     | null
     | undefined,
 ): boolean {
   return Boolean(
     subscription?.tariff_id &&
-      subscription.is_active &&
+      (subscription.is_active ||
+        (subscription.is_limited && new Date(subscription.end_date).getTime() > Date.now())) &&
       !subscription.is_trial &&
       !needsTariff(subscription),
   );

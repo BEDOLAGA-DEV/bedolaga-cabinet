@@ -1,3 +1,4 @@
+import { SubscriptionMirrorSelector } from '@/components/connection/SubscriptionMirrorSelector';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useTheme } from '../../hooks/useTheme';
@@ -256,6 +257,7 @@ export default function SubscriptionListCard({
         </Link>
       )}
 
+      {footer.kind !== 'hidden' && <SubscriptionMirrorSelector subscriptionId={subscription.id} />}
       <SubscriptionConnectFooter
         state={footer}
         borderColor={borderColor}

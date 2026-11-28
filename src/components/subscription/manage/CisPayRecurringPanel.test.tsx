@@ -17,9 +17,22 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     i18n: { language: 'en' },
     t: (key: string, values?: Record<string, unknown>) =>
-      key === 'subscription.cispayRecurring.consent' ? `${values?.amount} / ${values?.days}` : key,
+      key === 'subscription.cispayRecurring.consent'
+        ? `${values?.amount} / ${values?.days}`
+        : values?.count !== undefined
+          ? `${key}:${values.count}`
+          : key,
   }),
 }));
+const tariff = {
+  id: 3,
+  is_daily: false,
+  periods: [
+    { days: 7, price_kopeks: 7000 },
+    { days: 30, price_kopeks: 20000 },
+    { days: 365, price_kopeks: 100000 },
+  ],
+};
 vi.mock('@/hooks/useCurrency', () => ({
   useCurrency: () => ({ formatAmount: (amount: number) => `${amount / 100} RUB` }),
 }));
@@ -39,17 +52,108 @@ afterEach(() => {
   cleanup();
   vi.resetAllMocks();
 });
-it('cancels existing agreement even when setup is disabled', async () => {
+it('cancels existing agreement and does not offer a second setup', async () => {
   api.getCisPayRecurring.mockResolvedValue({
     status: 'ACTIVE',
     amount_kopeks: 12300,
     period_days: 10,
   });
   api.cancelCisPayRecurring.mockResolvedValue({ status: 'CANCEL_PENDING' });
-  mount(<CisPayRecurringPanel subscriptionId={42} canSetup={false} />);
+  mount(<CisPayRecurringPanel subscriptionId={42} setupTariff={tariff} />);
   fireEvent.click(await screen.findByText('subscription.cispayRecurring.cancel'));
   await waitFor(() => expect(api.cancelCisPayRecurring).toHaveBeenCalledWith(42, undefined));
-  expect(screen.queryByText('subscription.cispayRecurring.setup')).toBeNull();
+  expect(screen.queryByText('subscription.cispayRecurring.period')).toBeNull();
+  expect(screen.queryByText('subscription.cispayRecurring.choose')).toBeNull();
+});
+it('hides the panel when the subscription cannot be set up', async () => {
+  api.getCisPayRecurring.mockResolvedValue({ status: 'none' });
+  const { container } = mount(
+    <CisPayRecurringPanel
+      subscriptionId={42}
+      setupTariff={{ ...tariff, periods: [{ days: 365, price_kopeks: 100000 }] }}
+    />,
+  );
+  // Loading shows a skeleton; once the state arrives nothing is rendered.
+  await waitFor(() => expect(api.getCisPayRecurring).toHaveBeenCalled());
+  await waitFor(() => expect(container.firstChild).toBeNull());
+});
+it('sets up autopay for the current subscription right in the panel', async () => {
+  api.getCisPayRecurring.mockResolvedValue({ status: 'none' });
+  api.quoteCisPayRecurring.mockResolvedValue({
+    quote_id: 'quote',
+    amount_kopeks: 20000,
+    period_days: 30,
+  });
+  mount(<CisPayRecurringPanel subscriptionId={42} setupTariff={tariff} />);
+  const week = await screen.findByText('subscription.days:7');
+  const month = screen.getByText('subscription.days:30');
+  expect(screen.queryByText('subscription.days:365')).toBeNull();
+  expect(week.getAttribute('aria-pressed')).toBe('true');
+  fireEvent.click(month);
+  expect(month.getAttribute('aria-pressed')).toBe('true');
+  fireEvent.click(screen.getByText('subscription.cispayRecurring.choose'));
+  await screen.findByText(/200\.00.*30/);
+  // No device_limit: the backend keeps the paid subscription's own limit.
+  expect(api.quoteCisPayRecurring.mock.calls[0][0]).toStrictEqual({
+    tariff_id: 3,
+    subscription_id: 42,
+    period_days: 30,
+    device_limit: undefined,
+  });
+});
+it('custom days stay within the CisPay range', async () => {
+  api.getCisPayRecurring.mockResolvedValue({ status: 'none' });
+  api.quoteCisPayRecurring.mockResolvedValue({
+    quote_id: 'quote',
+    amount_kopeks: 36000,
+    period_days: 360,
+  });
+  mount(
+    <CisPayRecurringPanel
+      subscriptionId={42}
+      setupTariff={{
+        id: 3,
+        periods: [],
+        custom_days_enabled: true,
+        price_per_day_kopeks: 100,
+        min_days: 1,
+        max_days: 1000,
+      }}
+    />,
+  );
+  const input = (await screen.findByLabelText('subscription.customDays.title')) as HTMLInputElement;
+  expect(input.value).toBe('7');
+  // Typing «30» passes through «3», which is below the minimum and must not snap to 7.
+  fireEvent.change(input, { target: { value: '3' } });
+  expect(input.value).toBe('3');
+  fireEvent.change(input, { target: { value: '30' } });
+  fireEvent.blur(input);
+  expect(input.value).toBe('30');
+  // Out of range keeps the last valid period and shows it again on blur.
+  fireEvent.change(input, { target: { value: '999' } });
+  fireEvent.blur(input);
+  expect(input.value).toBe('30');
+  fireEvent.click(screen.getByText('subscription.cispayRecurring.choose'));
+  await waitFor(() =>
+    expect(api.quoteCisPayRecurring).toHaveBeenCalledWith(
+      expect.objectContaining({ subscription_id: 42, period_days: 30 }),
+    ),
+  );
+});
+it('falls back to an offered period when the tariff drops the chosen one', async () => {
+  api.getCisPayRecurring.mockResolvedValue({ status: 'none' });
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const view = (setupTariff: typeof tariff) => (
+    <QueryClientProvider client={client}>
+      <MemoryRouter>
+        <CisPayRecurringPanel subscriptionId={42} setupTariff={setupTariff} />
+      </MemoryRouter>
+    </QueryClientProvider>
+  );
+  const { rerender } = render(view(tariff));
+  fireEvent.click(await screen.findByText('subscription.days:30'));
+  rerender(view({ ...tariff, periods: [{ days: 7, price_kopeks: 7000 }] }));
+  expect(screen.getByText('subscription.days:7').getAttribute('aria-pressed')).toBe('true');
 });
 it('read-only admin cannot cancel or open customer checkout', async () => {
   api.getCisPayRecurring.mockResolvedValue({
@@ -126,4 +230,45 @@ it('explains that balance autopay must be disabled before bank setup', async () 
   expect((await screen.findByRole('alert')).textContent).toBe(
     'subscription.cispayRecurring.errors.balanceAutopay',
   );
+});
+
+it('does not quote a fractional or incomplete custom period', async () => {
+  api.getCisPayRecurring.mockResolvedValue({ status: 'none' });
+  mount(
+    <CisPayRecurringPanel
+      subscriptionId={42}
+      setupTariff={{
+        id: 3,
+        periods: [],
+        custom_days_enabled: true,
+        price_per_day_kopeks: 100,
+        min_days: 1,
+        max_days: 1000,
+      }}
+    />,
+  );
+  const input = await screen.findByLabelText('subscription.customDays.title');
+  const button = screen.getByText('subscription.cispayRecurring.choose') as HTMLButtonElement;
+  for (const value of ['7.5', '', '3', '361']) {
+    fireEvent.change(input, { target: { value } });
+    expect(button.disabled).toBe(true);
+    fireEvent.click(button);
+  }
+  expect(api.quoteCisPayRecurring).not.toHaveBeenCalled();
+  fireEvent.change(input, { target: { value: '30' } });
+  expect(button.disabled).toBe(false);
+});
+
+it('never offers customer checkout inside an admin view even with tariff props', async () => {
+  api.getCisPayRecurring.mockResolvedValue({ status: 'none' });
+  const { container } = mount(
+    <CisPayRecurringPanel
+      subscriptionId={42}
+      adminUserId={5}
+      canManage={false}
+      setupTariff={tariff}
+    />,
+  );
+  await waitFor(() => expect(api.getCisPayRecurring).toHaveBeenCalled());
+  await waitFor(() => expect(container.firstChild).toBeNull());
 });

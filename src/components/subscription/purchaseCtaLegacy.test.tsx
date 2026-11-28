@@ -132,10 +132,25 @@ describe('подписка с тарифом', () => {
     expect(screen.queryByText('subscription.extend')).toBeNull();
   });
 
+  it.each([false, true])('показывает смену при исчерпанном трафике (multi=%s)', async (multi) => {
+    await renderCta(
+      subscription({
+        tariff_id: 7,
+        is_active: false,
+        is_limited: true,
+        end_date: new Date(Date.now() + 86400000).toISOString(),
+      }),
+      multi,
+    );
+    expect(
+      screen.getByRole('link', { name: 'subscription.switchTariff.title' }).getAttribute('href'),
+    ).toBe('/subscription/purchase?subscriptionId=42');
+  });
+
   it.each([
     { is_trial: true },
     { is_active: false, is_expired: true },
-    { is_active: false, is_limited: true },
+    { is_active: false, is_limited: true, end_date: '2000-01-01T00:00:00Z' },
   ])('не предлагает прямую смену неподдерживаемого состояния %j', async (flags) => {
     await renderCta(subscription({ tariff_id: 7, ...flags }), true);
     expect(screen.queryByRole('link', { name: 'subscription.switchTariff.title' })).toBeNull();
