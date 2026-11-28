@@ -1,4 +1,74 @@
 {
+  "home": {
+    "status": {
+      "none": "Нет подписки",
+      "trial": "Пробный период",
+      "active": "Активна",
+      "expiring": "Скоро закончится",
+      "limited": "Трафик закончился",
+      "expired": "Закончилась"
+    },
+    "big": {
+      "days_one": "{{count}} день",
+      "days_few": "{{count}} дня",
+      "days_many": "{{count}} дней",
+      "days_other": "{{count}} дня",
+      "hours_one": "{{count}} час",
+      "hours_few": "{{count}} часа",
+      "hours_many": "{{count}} часов",
+      "hours_other": "{{count}} часа",
+      "trialDays_one": "{{count}} день бесплатно",
+      "trialDays_few": "{{count}} дня бесплатно",
+      "trialDays_many": "{{count}} дней бесплатно",
+      "trialDays_other": "{{count}} дня бесплатно",
+      "noSub": "Подписки нет",
+      "paused": "На паузе",
+      "trafficOut": "Лимит исчерпан"
+    },
+    "sub": {
+      "until": "До {{date}}",
+      "autopayOn": "автоплатёж включён",
+      "endedOn": "Закончилась {{date}}.",
+      "devicesKept_one": "{{count}} устройство сохранено и заработает после продления.",
+      "devicesKept_few": "{{count}} устройства сохранены и заработают после продления.",
+      "devicesKept_many": "{{count}} устройств сохранены и заработают после продления.",
+      "devicesKept_other": "{{count}} устройства сохранены и заработают после продления.",
+      "limited": "Подписка действует до {{date}}. Смените тариф, чтобы продолжить.",
+      "trialOffer": "Полный доступ на пробный период. Карта не нужна.",
+      "noSub": "Выберите тариф, чтобы подключиться."
+    },
+    "action": {
+      "connect": "Подключить устройство",
+      "renew": "Продлить",
+      "switchTariff": "Сменить тариф",
+      "autopay": "Автоплатёж",
+      "buyTariff": "Купить тариф",
+      "plans": "Тарифы",
+      "tryFree": "Попробовать бесплатно",
+      "activating": "Включаем…"
+    },
+    "tile": {
+      "devices": "Устройства",
+      "devicesOf": "{{used}} из {{limit}}",
+      "devicesUnlimited": "без ограничений",
+      "addDevice": "Добавить устройство",
+      "traffic": "Трафик",
+      "trafficLimit": "из {{limit}}",
+      "trafficUnlimited": "безлимит",
+      "balance": "Баланс",
+      "topUp": "Пополнить",
+      "friends": "Друзья",
+      "invite": "Пригласить",
+      "earned": "+{{amount}} заработано"
+    },
+    "steps": {
+      "title": "Как подключиться",
+      "trial": "Включите пробный период",
+      "plan": "Выберите тариф",
+      "app": "Установите приложение",
+      "connect": "Нажмите «Подключить»"
+    }
+  },
   "deviceCards": {
     "countOf": "{{used}} из {{limit}}",
     "countUnlimited": "{{count}} · без ограничений",

@@ -19,6 +19,8 @@ import { hasLegacySubscription } from '../utils/legacySubscription';
 import TrialOfferCard from '../components/dashboard/TrialOfferCard';
 import ReminderCards from '../components/dashboard/ReminderCards';
 import StatsGrid from '../components/dashboard/StatsGrid';
+import HomeOverview from '../components/dashboard/home/HomeOverview';
+import { useFeatureFlags } from '../hooks/useFeatureFlags';
 import { giftApi } from '../api/gift';
 import { promoApi } from '../api/promo';
 import PendingGiftCard from '../components/dashboard/PendingGiftCard';
@@ -263,6 +265,12 @@ export default function Dashboard() {
   // не предлагаем, её карточка ведёт на переход на тариф.
   const hasLegacy = hasLegacySubscription(multiSubData?.subscriptions);
 
+  // Новая главная (плитка статуса + плитки) — для одной подписки. Мульти-тариф
+  // и суточные тарифы остаются на прежних карточках: у них своя логика оплаты.
+  const useNewHome = !isMultiTariff && !subscription?.is_daily;
+  const freeTrial = trialInfo?.is_available && !trialInfo.requires_payment ? trialInfo : null;
+  const { referralEnabled } = useFeatureFlags();
+
   // Show onboarding for new users after data loads
   useEffect(() => {
     if (!isOnboardingCompleted && !subLoading && !refLoading && !blockingType) {
@@ -343,7 +351,23 @@ export default function Dashboard() {
           при доступном триале это был единственный экран без кнопки покупки
           (Telegram-баг #605056/#605063). Единственная кнопка тут (вместо
           дубля с мульти-тариф блоком). */}
-      {hasNoSubscription && !trialLoading && (
+      {/* Новая главная сама предлагает бесплатный пробный период и тарифы;
+          платный пробный период по-прежнему оформляется своей карточкой. */}
+      {hasNoSubscription &&
+        !trialLoading &&
+        useNewHome &&
+        trialInfo?.is_available &&
+        !freeTrial && (
+          <TrialOfferCard
+            trialInfo={trialInfo}
+            balanceKopeks={balanceData?.balance_kopeks || 0}
+            balanceRubles={balanceData?.balance_rubles || 0}
+            activateTrialMutation={activateTrialMutation}
+            trialError={trialError}
+          />
+        )}
+
+      {hasNoSubscription && !trialLoading && !useNewHome && (
         <div className="space-y-3">
           {trialInfo?.is_available && (
             <TrialOfferCard
@@ -446,8 +470,37 @@ export default function Dashboard() {
         </div>
       )}
 
+      {useNewHome && (
+        <HomeOverview
+          loading={subLoading || (!subscription && trialLoading)}
+          subscription={subscription}
+          devicesTotal={devicesData?.total ?? 0}
+          traffic={
+            trafficData
+              ? {
+                  used_gb: trafficData.traffic_used_gb,
+                  percent: trafficData.traffic_used_percent,
+                  unlimited: trafficData.is_unlimited,
+                }
+              : null
+          }
+          balanceRubles={balanceData?.balance_rubles || 0}
+          referral={{
+            enabled: referralEnabled !== false,
+            count: referralInfo?.total_referrals || 0,
+            earningsRubles: referralInfo?.available_balance_rubles || 0,
+          }}
+          freeTrial={freeTrial}
+          onActivateTrial={() => activateTrialMutation.mutate()}
+          trialPending={activateTrialMutation.isPending}
+          trialError={trialError}
+          promo={<PromoOffersSection />}
+        />
+      )}
+
       {/* Subscription Status Card — hidden in multi-tariff (managed via /subscriptions) */}
       {!isMultiTariff &&
+        !useNewHome &&
         (subLoading ? (
           <SkeletonGroup className="bento-card">
             <div className="mb-4 flex items-center justify-between">
@@ -479,16 +532,18 @@ export default function Dashboard() {
           />
         ) : null)}
 
-      {/* Promo Offers */}
-      <PromoOffersSection />
+      {/* Promo Offers — в новой главной стоят под плиткой статуса */}
+      {!useNewHome && <PromoOffersSection />}
 
-      {/* Stats Grid */}
-      <StatsGrid
-        balanceRubles={balanceData?.balance_rubles || 0}
-        referralCount={referralInfo?.total_referrals || 0}
-        earningsRubles={referralInfo?.available_balance_rubles || 0}
-        refLoading={refLoading}
-      />
+      {/* Stats Grid — в новой главной баланс и друзья уже плитками */}
+      {!useNewHome && (
+        <StatsGrid
+          balanceRubles={balanceData?.balance_rubles || 0}
+          referralCount={referralInfo?.total_referrals || 0}
+          earningsRubles={referralInfo?.available_balance_rubles || 0}
+          refLoading={refLoading}
+        />
+      )}
 
       {/* Fortune Wheel Banner */}
       {wheelConfig?.is_enabled && (

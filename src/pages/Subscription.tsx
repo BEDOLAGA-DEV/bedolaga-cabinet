@@ -36,6 +36,7 @@ import { resolveConnectionUrlForUi } from '../utils/connectionLink';
 import { getFlagEmoji } from '../utils/subscriptionHelpers';
 import Twemoji from '@/lib/twemoji';
 import { AutopayToggle } from '../components/subscription/manage/AutopayToggle';
+import FocusAnchor from '../components/FocusAnchor';
 import { DailyPausePanel } from '../components/subscription/manage/DailyPausePanel';
 import {
   canReissueLink,
@@ -952,13 +953,15 @@ export default function Subscription() {
               )}
 
               {/* ─── Autopay Toggle ─── */}
-              <AutopayToggle
-                subscription={subscription}
-                subscriptionId={subscriptionId}
-                accentColor={zone.mainHex}
-                offColor={g.textGhost}
-                surface={{ background: g.innerBg, border: g.innerBorder }}
-              />
+              <FocusAnchor id="autopay">
+                <AutopayToggle
+                  subscription={subscription}
+                  subscriptionId={subscriptionId}
+                  accentColor={zone.mainHex}
+                  offColor={g.textGhost}
+                  surface={{ background: g.innerBg, border: g.innerBorder }}
+                />
+              </FocusAnchor>
 
               <RecurringPanels subscription={subscription} subscriptionId={subscriptionId} />
             </div>
@@ -1122,9 +1125,9 @@ export default function Subscription() {
       {/* My Devices Section */}
       {subscription && (
         // Без внешней карточки: каждое устройство уже карточка, вложенность лишняя.
-        <div className="px-1">
+        <FocusAnchor id="devices" className="px-1">
           <DevicesPanel subscription={subscription} subscriptionId={subscriptionId} />
-        </div>
+        </FocusAnchor>
       )}
     </div>
   );

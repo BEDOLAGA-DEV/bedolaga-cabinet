@@ -1,4 +1,62 @@
 {
+  "home": {
+    "status": {
+      "none": "暂无订阅",
+      "trial": "试用期",
+      "active": "有效",
+      "expiring": "即将到期",
+      "limited": "流量已用完",
+      "expired": "已到期"
+    },
+    "big": {
+      "days_other": "{{count}} 天",
+      "hours_other": "{{count}} 小时",
+      "trialDays_other": "免费 {{count}} 天",
+      "noSub": "暂无订阅",
+      "paused": "已暂停",
+      "trafficOut": "已达上限"
+    },
+    "sub": {
+      "until": "有效期至 {{date}}",
+      "autopayOn": "已开启自动付款",
+      "endedOn": "已于 {{date}} 到期。",
+      "devicesKept_other": "您的 {{count}} 台设备已保留，续订后即可恢复使用。",
+      "limited": "订阅有效期至 {{date}}。更换套餐即可继续使用。",
+      "trialOffer": "试用期内享受完整服务，无需绑定银行卡。",
+      "noSub": "选择套餐即可开始连接。"
+    },
+    "action": {
+      "connect": "连接设备",
+      "renew": "续订",
+      "switchTariff": "更换套餐",
+      "autopay": "自动付款",
+      "buyTariff": "购买套餐",
+      "plans": "套餐",
+      "tryFree": "免费试用",
+      "activating": "正在开通…"
+    },
+    "tile": {
+      "devices": "设备",
+      "devicesOf": "{{used}} / {{limit}}",
+      "devicesUnlimited": "不限数量",
+      "addDevice": "添加设备",
+      "traffic": "流量",
+      "trafficLimit": "共 {{limit}}",
+      "trafficUnlimited": "不限流量",
+      "balance": "余额",
+      "topUp": "充值",
+      "friends": "好友",
+      "invite": "邀请",
+      "earned": "已赚 +{{amount}}"
+    },
+    "steps": {
+      "title": "如何连接",
+      "trial": "开通免费试用",
+      "plan": "选择套餐",
+      "app": "安装应用",
+      "connect": "点击“连接”"
+    }
+  },
   "deviceCards": {
     "countOf": "{{used}} / {{limit}}",
     "countUnlimited": "{{count}} · 不限数量",

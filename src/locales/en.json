@@ -1,4 +1,66 @@
 {
+  "home": {
+    "status": {
+      "none": "No subscription",
+      "trial": "Trial",
+      "active": "Active",
+      "expiring": "Ending soon",
+      "limited": "Traffic used up",
+      "expired": "Ended"
+    },
+    "big": {
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "hours_one": "{{count}} hour",
+      "hours_other": "{{count}} hours",
+      "trialDays_one": "{{count}} day free",
+      "trialDays_other": "{{count}} days free",
+      "noSub": "No subscription",
+      "paused": "Paused",
+      "trafficOut": "Limit reached"
+    },
+    "sub": {
+      "until": "Until {{date}}",
+      "autopayOn": "autopay on",
+      "endedOn": "Ended on {{date}}.",
+      "devicesKept_one": "{{count}} device is saved and will work again once you renew.",
+      "devicesKept_other": "Your {{count}} devices are saved and will work again once you renew.",
+      "limited": "Your subscription runs until {{date}}. Change your plan to continue.",
+      "trialOffer": "Full access for the trial period. No card needed.",
+      "noSub": "Pick a plan to get connected."
+    },
+    "action": {
+      "connect": "Connect a device",
+      "renew": "Renew",
+      "switchTariff": "Change plan",
+      "autopay": "Autopay",
+      "buyTariff": "Buy a plan",
+      "plans": "Plans",
+      "tryFree": "Try for free",
+      "activating": "Activating…"
+    },
+    "tile": {
+      "devices": "Devices",
+      "devicesOf": "{{used}} of {{limit}}",
+      "devicesUnlimited": "no limit",
+      "addDevice": "Add a device",
+      "traffic": "Traffic",
+      "trafficLimit": "of {{limit}}",
+      "trafficUnlimited": "unlimited",
+      "balance": "Balance",
+      "topUp": "Top up",
+      "friends": "Friends",
+      "invite": "Invite",
+      "earned": "+{{amount}} earned"
+    },
+    "steps": {
+      "title": "How to connect",
+      "trial": "Start the free trial",
+      "plan": "Pick a plan",
+      "app": "Install the app",
+      "connect": "Tap “Connect”"
+    }
+  },
   "deviceCards": {
     "countOf": "{{used}} of {{limit}}",
     "countUnlimited": "{{count}} · unlimited",
