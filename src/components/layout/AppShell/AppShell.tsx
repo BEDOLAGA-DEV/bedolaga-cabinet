@@ -27,13 +27,13 @@ import TicketNotificationBell from '@/components/TicketNotificationBell';
 import {
   SubscriptionIcon,
   GiftIcon,
+  StarIcon,
   HomeIcon,
   CreditCardIcon,
   ChatIcon,
   UserIcon,
   UsersIcon,
   ShieldIcon,
-  InfoIcon,
   SunIcon,
   MoonIcon,
 } from '@/components/icons';
@@ -42,6 +42,7 @@ import { MobileBottomNav } from './MobileBottomNav';
 import { isMobileNavScreen, mobileNavItems } from './mobileNavRoutes';
 import { AppHeader } from './AppHeader';
 import { LogoutButton } from './LogoutButton';
+import { BrandName } from '@/components/BrandName';
 import { useBackgroundConsumer } from '@/components/backgrounds/BackgroundHost';
 
 interface AppShellProps {
@@ -60,7 +61,7 @@ export function AppShell({ children }: AppShellProps) {
   const { toggleTheme, isDark } = useTheme();
 
   // Extracted hooks
-  const { appName, logoLetter, hasCustomLogo, logoUrl } = useBranding();
+  const { appName, appNameMarkup, logoLetter, hasCustomLogo, logoUrl } = useBranding();
   const { referralEnabled, wheelEnabled, hasContests, hasPolls, giftEnabled } = useFeatureFlags();
   const { lite } = useLiteMode();
   useScrollRestoration();
@@ -102,7 +103,7 @@ export function AppShell({ children }: AppShellProps) {
     ...(referralEnabled ? [{ path: '/referral', label: t('nav.referral'), icon: UsersIcon }] : []),
     ...(giftEnabled ? [{ path: '/gift', label: t('nav.gift'), icon: GiftIcon }] : []),
     { path: '/support', label: t('nav.support'), icon: ChatIcon },
-    { path: '/info', label: t('nav.info'), icon: InfoIcon },
+    { path: '/info', label: t('info.loyalty'), icon: StarIcon },
     { path: '/profile', label: t('nav.profile'), icon: UserIcon },
   ];
 
@@ -130,6 +131,9 @@ export function AppShell({ children }: AppShellProps) {
         to={path}
         onClick={handleNavClick}
         aria-label={label}
+        // Сюда в конце заставки садится оранжевая точка (src/intro/intro.js).
+        data-intro-nav=""
+        aria-current={active ? 'page' : undefined}
         className={cn(
           'relative flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors duration-200',
           active
@@ -187,7 +191,13 @@ export function AppShell({ children }: AppShellProps) {
             className="flex shrink-0 items-center gap-2.5 justify-self-start"
             onClick={handleNavClick}
           >
-            <div className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-dark-800">
+            <div
+              className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dark-800"
+              style={{
+                boxShadow:
+                  '0 0 0 1px rgba(var(--color-accent-400), 0.2), 0 4px 12px rgba(0,0,0,0.4)',
+              }}
+            >
               <span
                 className={cn(
                   'absolute text-sm font-bold text-accent-400 transition-opacity duration-200',
@@ -207,7 +217,9 @@ export function AppShell({ children }: AppShellProps) {
                 />
               )}
             </div>
-            <span className="text-base font-semibold text-dark-100">{appName}</span>
+            <span className="text-base font-semibold text-dark-100">
+              <BrandName markup={appNameMarkup} />
+            </span>
           </Link>
 
           {/* Navigation — единая «капсула» (segmented control): все пункты видны

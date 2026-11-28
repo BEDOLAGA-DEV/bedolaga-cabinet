@@ -19,13 +19,16 @@ import { hasLegacySubscription } from '../utils/legacySubscription';
 import TrialOfferCard from '../components/dashboard/TrialOfferCard';
 import ReminderCards from '../components/dashboard/ReminderCards';
 import StatsGrid from '../components/dashboard/StatsGrid';
+import HomeOverview from '../components/dashboard/home/HomeOverview';
+import { useFeatureFlags } from '../hooks/useFeatureFlags';
 import { giftApi } from '../api/gift';
 import { promoApi } from '../api/promo';
 import PendingGiftCard from '../components/dashboard/PendingGiftCard';
 import SubscriptionListCard from '../components/subscription/SubscriptionListCard';
 import { DeviceLimitSheet } from '../components/subscription/DeviceLimitSheet';
 import { API } from '../config/constants';
-import { ChevronRightIcon, StarIcon } from '@/components/icons';
+import { ChevronRightIcon, StarIcon, LockIcon } from '@/components/icons';
+import { authApi } from '../api/auth';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { safeLocal } from '../utils/safeStorage';
 
@@ -52,6 +55,18 @@ export default function Dashboard() {
     staleTime: API.BALANCE_STALE_TIME_MS,
     refetchOnMount: 'always',
   });
+
+  // Способы входа: тот же queryKey, что на /profile/accounts, — кэш общий,
+  // переход туда не стоит лишнего запроса. Баннер «привязать email» на
+  // главной показываем только пока привязан ровно один способ входа —
+  // единственная точка входа означает риск потерять доступ к аккаунту.
+  const { data: linkedProvidersData } = useQuery({
+    queryKey: ['linked-providers'],
+    queryFn: () => authApi.getLinkedProviders(),
+    staleTime: 60_000,
+  });
+  const linkedProvidersCount = linkedProvidersData?.providers.filter((p) => p.linked).length ?? 0;
+  const showLinkAccountBanner = linkedProvidersCount === 1;
 
   // Multi-tariff: check if user has multiple subscriptions
   const { data: multiSubData } = useQuery({
@@ -250,6 +265,12 @@ export default function Dashboard() {
   // не предлагаем, её карточка ведёт на переход на тариф.
   const hasLegacy = hasLegacySubscription(multiSubData?.subscriptions);
 
+  // Новая главная (плитка статуса + плитки) — для одной подписки. Мульти-тариф
+  // и суточные тарифы остаются на прежних карточках: у них своя логика оплаты.
+  const useNewHome = !isMultiTariff && !subscription?.is_daily;
+  const freeTrial = trialInfo?.is_available && !trialInfo.requires_payment ? trialInfo : null;
+  const { referralEnabled } = useFeatureFlags();
+
   // Show onboarding for new users after data loads
   useEffect(() => {
     if (!isOnboardingCompleted && !subLoading && !refLoading && !blockingType) {
@@ -324,6 +345,75 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Нет подписок: показываем триал (если доступен) и ВСЕГДА одну явную
+          кнопку покупки — обе приоритетнее баннера способа входа, это
+          конверсионный блок. Кнопка не пропадает даже без триала — раньше
+          при доступном триале это был единственный экран без кнопки покупки
+          (Telegram-баг #605056/#605063). Единственная кнопка тут (вместо
+          дубля с мульти-тариф блоком). */}
+      {/* Новая главная сама предлагает бесплатный пробный период и тарифы;
+          платный пробный период по-прежнему оформляется своей карточкой. */}
+      {hasNoSubscription &&
+        !trialLoading &&
+        useNewHome &&
+        trialInfo?.is_available &&
+        !freeTrial && (
+          <TrialOfferCard
+            trialInfo={trialInfo}
+            balanceKopeks={balanceData?.balance_kopeks || 0}
+            balanceRubles={balanceData?.balance_rubles || 0}
+            activateTrialMutation={activateTrialMutation}
+            trialError={trialError}
+          />
+        )}
+
+      {hasNoSubscription && !trialLoading && !useNewHome && (
+        <div className="space-y-3">
+          {trialInfo?.is_available && (
+            <TrialOfferCard
+              trialInfo={trialInfo}
+              balanceKopeks={balanceData?.balance_kopeks || 0}
+              balanceRubles={balanceData?.balance_rubles || 0}
+              activateTrialMutation={activateTrialMutation}
+              trialError={trialError}
+            />
+          )}
+          <Link
+            to="/subscription/purchase"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500 p-3.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-600"
+          >
+            <span className="text-base">+</span>{' '}
+            {t('subscriptions.browsePlans', 'Посмотреть тарифы и купить подписку')}
+          </Link>
+        </div>
+      )}
+
+      {/* Единственный способ входа — риск потерять доступ к аккаунту. Ниже
+          триала (тот конверсионный), но выше hero-блока подписки/баланса.
+          Показываем только пока привязан ровно 1 провайдер; при 0 (не должно
+          случаться, юзер всегда авторизован хоть чем-то) или 2+ баннер скрыт. */}
+      {showLinkAccountBanner && (
+        <Link
+          to="/profile/accounts"
+          className="group flex flex-col gap-3 rounded-2xl border border-accent-500/30 bg-accent-500/10 p-4 transition-colors hover:bg-accent-500/15 sm:flex-row sm:items-center"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-500/20 text-accent-400">
+              <LockIcon className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-dark-50">{t('dashboard.linkAccountBanner.title')}</p>
+              <p className="mt-0.5 text-sm text-dark-400">
+                {t('dashboard.linkAccountBanner.subtitle')}
+              </p>
+            </div>
+          </div>
+          <span className="whitespace-nowrap rounded-xl bg-accent-500 px-3.5 py-2 text-center text-sm font-semibold text-on-accent shadow-linear-sm transition-colors group-hover:bg-accent-600 sm:shrink-0">
+            {t('dashboard.linkAccountBanner.cta')}
+          </span>
+        </Link>
+      )}
+
       {/* Pending Gift Activations */}
       {pendingGifts && pendingGifts.length > 0 && <PendingGiftCard gifts={pendingGifts} />}
 
@@ -380,8 +470,37 @@ export default function Dashboard() {
         </div>
       )}
 
+      {useNewHome && (
+        <HomeOverview
+          loading={subLoading || (!subscription && trialLoading)}
+          subscription={subscription}
+          devicesTotal={devicesData?.total ?? 0}
+          traffic={
+            trafficData
+              ? {
+                  used_gb: trafficData.traffic_used_gb,
+                  percent: trafficData.traffic_used_percent,
+                  unlimited: trafficData.is_unlimited,
+                }
+              : null
+          }
+          balanceRubles={balanceData?.balance_rubles || 0}
+          referral={{
+            enabled: referralEnabled !== false,
+            count: referralInfo?.total_referrals || 0,
+            earningsRubles: referralInfo?.available_balance_rubles || 0,
+          }}
+          freeTrial={freeTrial}
+          onActivateTrial={() => activateTrialMutation.mutate()}
+          trialPending={activateTrialMutation.isPending}
+          trialError={trialError}
+          promo={<PromoOffersSection />}
+        />
+      )}
+
       {/* Subscription Status Card — hidden in multi-tariff (managed via /subscriptions) */}
       {!isMultiTariff &&
+        !useNewHome &&
         (subLoading ? (
           <SkeletonGroup className="bento-card">
             <div className="mb-4 flex items-center justify-between">
@@ -413,42 +532,18 @@ export default function Dashboard() {
           />
         ) : null)}
 
-      {/* Нет подписок: показываем триал (если доступен) и ВСЕГДА одну явную
-          кнопку покупки. Триал не обязателен, чтобы попасть в витрину — раньше
-          при доступном триале это был единственный экран без кнопки покупки
-          (Telegram-баг #605056/#605063). Единственная кнопка тут (вместо дубля
-          с мульти-тариф блоком). */}
-      {hasNoSubscription && !trialLoading && (
-        <div className="space-y-3">
-          {trialInfo?.is_available && (
-            <TrialOfferCard
-              trialInfo={trialInfo}
-              balanceKopeks={balanceData?.balance_kopeks || 0}
-              balanceRubles={balanceData?.balance_rubles || 0}
-              activateTrialMutation={activateTrialMutation}
-              trialError={trialError}
-            />
-          )}
-          <Link
-            to="/subscription/purchase"
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500 p-3.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-600"
-          >
-            <span className="text-base">+</span>{' '}
-            {t('subscriptions.browsePlans', 'Посмотреть тарифы и купить подписку')}
-          </Link>
-        </div>
+      {/* Promo Offers — в новой главной стоят под плиткой статуса */}
+      {!useNewHome && <PromoOffersSection />}
+
+      {/* Stats Grid — в новой главной баланс и друзья уже плитками */}
+      {!useNewHome && (
+        <StatsGrid
+          balanceRubles={balanceData?.balance_rubles || 0}
+          referralCount={referralInfo?.total_referrals || 0}
+          earningsRubles={referralInfo?.available_balance_rubles || 0}
+          refLoading={refLoading}
+        />
       )}
-
-      {/* Promo Offers */}
-      <PromoOffersSection />
-
-      {/* Stats Grid */}
-      <StatsGrid
-        balanceRubles={balanceData?.balance_rubles || 0}
-        referralCount={referralInfo?.total_referrals || 0}
-        earningsRubles={referralInfo?.available_balance_rubles || 0}
-        refLoading={refLoading}
-      />
 
       {/* Fortune Wheel Banner */}
       {wheelConfig?.is_enabled && (

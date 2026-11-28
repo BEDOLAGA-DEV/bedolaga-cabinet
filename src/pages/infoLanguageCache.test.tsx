@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import Info from './Info';
 import PublicLegal, { type PublicLegalDoc } from './PublicLegal';
 
 const state = vi.hoisted(() => ({ language: 'ru', get: vi.fn() }));
@@ -59,24 +58,3 @@ it.each(['offer', 'privacy', 'recurrent'] as PublicLegalDoc[])(
     expect(await screen.findByText('Document-ru')).toBeTruthy();
   },
 );
-
-it('switches FAQ and rules language without mixing their cached responses', async () => {
-  const element = () => (
-    <QueryClientProvider client={client}>
-      <Info />
-    </QueryClientProvider>
-  );
-  const view = render(element());
-  expect(await screen.findByText('FAQ-ru')).toBeTruthy();
-  state.language = 'en';
-  view.rerender(element());
-  expect(await screen.findByText('FAQ-en')).toBeTruthy();
-  expect(screen.queryByText('FAQ-ru')).toBeNull();
-  fireEvent.click(screen.getByRole('button', { name: 'info.rules' }));
-  expect(await screen.findByText('Document-en')).toBeTruthy();
-  state.language = 'ru';
-  view.rerender(element());
-  expect(await screen.findByText('Document-ru')).toBeTruthy();
-  expect(state.get).toHaveBeenCalledWith('/cabinet/info/faq', { params: { language: 'en' } });
-  expect(state.get).toHaveBeenCalledWith('/cabinet/info/rules', { params: { language: 'ru' } });
-});

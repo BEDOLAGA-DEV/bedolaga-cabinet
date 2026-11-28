@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import TicketNotificationBell from '@/components/TicketNotificationBell';
 import { LogoutButton } from './LogoutButton';
+import { BrandName } from '@/components/BrandName';
 
 // Icons
 import {
@@ -33,7 +34,7 @@ import {
   UserIcon,
   GamepadIcon,
   ClipboardIcon,
-  InfoIcon,
+  StarIcon,
   CogIcon,
   WheelIcon,
   GiftIcon,
@@ -108,6 +109,7 @@ export function AppHeader({
   });
 
   const appName = branding ? branding.name : FALLBACK_NAME;
+  const appNameMarkup = branding ? (branding.name_markup ?? branding.name) : FALLBACK_NAME;
   const logoLetter = branding?.logo_letter || FALLBACK_LOGO;
   const hasCustomLogo = branding?.has_custom_logo || false;
   const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null;
@@ -158,7 +160,7 @@ export function AppHeader({
     ...(hasPolls ? [{ path: '/polls', label: t('nav.polls'), icon: ClipboardIcon }] : []),
     ...(wheelEnabled ? [{ path: '/wheel', label: t('nav.wheel'), icon: WheelIcon }] : []),
     ...(giftEnabled ? [{ path: '/gift', label: t('nav.gift'), icon: GiftIcon }] : []),
-    { path: '/info', label: t('nav.info'), icon: InfoIcon },
+    { path: '/info', label: t('info.loyalty'), icon: StarIcon },
   ];
 
   return (
@@ -188,7 +190,13 @@ export function AppHeader({
               onClick={() => setMobileMenuOpen(false)}
               className={cn('flex flex-shrink-0 items-center gap-2.5', !appName && 'mr-4')}
             >
-              <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-linear-lg border border-dark-700/50 bg-dark-800/80 shadow-md">
+              <div
+                className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dark-800/80"
+                style={{
+                  boxShadow:
+                    '0 0 0 1px rgba(var(--color-accent-400), 0.2), 0 4px 12px rgba(0,0,0,0.4)',
+                }}
+              >
                 <span
                   className={cn(
                     'absolute text-lg font-bold text-accent-400 transition-opacity duration-200',
@@ -211,7 +219,7 @@ export function AppHeader({
               </div>
               {appName && (
                 <span className="whitespace-nowrap text-base font-semibold text-dark-100">
-                  {appName}
+                  <BrandName markup={appNameMarkup} />
                 </span>
               )}
             </Link>

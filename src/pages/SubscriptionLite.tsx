@@ -6,14 +6,15 @@ import ManagedTrafficSummary from '@/components/subscription/ManagedTrafficSumma
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
 
 import { subscriptionApi } from '@/api/subscription';
 import { LiteMeter } from '@/components/lite/LiteMeter';
 import { LiteRow, LiteRowGroup } from '@/components/lite/LiteRow';
 import { AutopayToggle } from '@/components/subscription/manage/AutopayToggle';
+import FocusAnchor from '@/components/FocusAnchor';
 import { DailyPausePanel } from '@/components/subscription/manage/DailyPausePanel';
-import { DevicesPanel } from '@/components/subscription/manage/DevicesPanel';
+import { DeviceCards as DevicesPanel } from '@/components/subscription/manage/DeviceCards';
 import { RecurringPanels } from '@/components/subscription/manage/RecurringPanels';
 import {
   canReissueLink,
@@ -66,7 +67,9 @@ export default function SubscriptionLite() {
   const { isDark } = useTheme();
   const glass = getGlassColors(isDark);
 
-  const [panel, setPanel] = useState<OpenPanel>(null);
+  // С главной приходят по «#devices» — список устройств открываем сразу.
+  const { hash } = useLocation();
+  const [panel, setPanel] = useState<OpenPanel>(() => (hash === '#devices' ? 'devicesList' : null));
   const [devicesToAdd, setDevicesToAdd] = useState(1);
   const [targetDeviceLimit, setTargetDeviceLimit] = useState(1);
   const [trafficPackage, setTrafficPackage] = useState<number | null>(null);
@@ -336,19 +339,21 @@ export default function SubscriptionLite() {
               пробных и старых подписок, автосписания — у выключенной фичи,
               перевыпуск — у неактивных, пауза — у непосуточных. Поэтому они
               стоят прямо в списке, а не за строкой, которая вела бы в пустоту. */}
-          <AutopayToggle
-            subscription={subscription}
-            subscriptionId={subscriptionId}
-            accentColor="rgb(var(--color-accent-500))"
-            offColor="rgba(148, 163, 184, 0.3)"
-          />
+          <FocusAnchor id="autopay">
+            <AutopayToggle
+              subscription={subscription}
+              subscriptionId={subscriptionId}
+              accentColor="rgb(var(--color-accent-500))"
+              offColor="rgba(148, 163, 184, 0.3)"
+            />
+          </FocusAnchor>
 
           <RecurringPanels subscription={subscription} subscriptionId={subscriptionId} />
 
           {panel === 'devicesList' ? (
-            <div className="py-4">
+            <FocusAnchor id="devices" className="py-4">
               <DevicesPanel subscription={subscription} subscriptionId={subscriptionId} />
-            </div>
+            </FocusAnchor>
           ) : (
             <LiteRow
               label={t('lite.rows.myDevices', 'Мои устройства')}

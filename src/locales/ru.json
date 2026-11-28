@@ -1,4 +1,85 @@
 {
+  "home": {
+    "status": {
+      "none": "Нет подписки",
+      "trial": "Пробный период",
+      "active": "Активна",
+      "expiring": "Скоро закончится",
+      "limited": "Трафик закончился",
+      "expired": "Закончилась"
+    },
+    "big": {
+      "days_one": "{{count}} день",
+      "days_few": "{{count}} дня",
+      "days_many": "{{count}} дней",
+      "days_other": "{{count}} дня",
+      "hours_one": "{{count}} час",
+      "hours_few": "{{count}} часа",
+      "hours_many": "{{count}} часов",
+      "hours_other": "{{count}} часа",
+      "trialDays_one": "{{count}} день бесплатно",
+      "trialDays_few": "{{count}} дня бесплатно",
+      "trialDays_many": "{{count}} дней бесплатно",
+      "trialDays_other": "{{count}} дня бесплатно",
+      "noSub": "Подписки нет",
+      "paused": "На паузе",
+      "trafficOut": "Лимит исчерпан"
+    },
+    "sub": {
+      "until": "До {{date}}",
+      "autopayOn": "автоплатёж включён",
+      "endedOn": "Закончилась {{date}}.",
+      "devicesKept_one": "{{count}} устройство сохранено и заработает после продления.",
+      "devicesKept_few": "{{count}} устройства сохранены и заработают после продления.",
+      "devicesKept_many": "{{count}} устройств сохранены и заработают после продления.",
+      "devicesKept_other": "{{count}} устройства сохранены и заработают после продления.",
+      "limited": "Подписка действует до {{date}}. Смените тариф, чтобы продолжить.",
+      "trialOffer": "Полный доступ на пробный период. Карта не нужна.",
+      "noSub": "Выберите тариф, чтобы подключиться."
+    },
+    "action": {
+      "connect": "Подключить устройство",
+      "renew": "Продлить",
+      "switchTariff": "Сменить тариф",
+      "autopay": "Автоплатёж",
+      "buyTariff": "Купить тариф",
+      "plans": "Тарифы",
+      "tryFree": "Попробовать бесплатно",
+      "activating": "Включаем…"
+    },
+    "tile": {
+      "devices": "Устройства",
+      "devicesOf": "{{used}} из {{limit}}",
+      "devicesUnlimited": "без ограничений",
+      "addDevice": "Добавить устройство",
+      "traffic": "Трафик",
+      "trafficLimit": "из {{limit}}",
+      "trafficUnlimited": "безлимит",
+      "balance": "Баланс",
+      "topUp": "Пополнить",
+      "friends": "Друзья",
+      "invite": "Пригласить",
+      "earned": "+{{amount}} заработано"
+    },
+    "steps": {
+      "title": "Как подключиться",
+      "trial": "Включите пробный период",
+      "plan": "Выберите тариф",
+      "app": "Установите приложение",
+      "connect": "Нажмите «Подключить»"
+    }
+  },
+  "deviceCards": {
+    "countOf": "{{used}} из {{limit}}",
+    "countUnlimited": "{{count}} · без ограничений",
+    "added": "Добавлено {{date}}",
+    "connectFirst": "Подключить первое устройство",
+    "connectMore": "Подключить устройство",
+    "freeSlots": "Свободно мест: {{count}}",
+    "freeUnlimited": "Без ограничения по количеству",
+    "limitReached": "Все места заняты. Чтобы подключить новое устройство, удалите старое.",
+    "deleteAll": "Удалить все ({{count}})"
+  },
   "common": {
     "all": "Все",
     "loading": "Загрузка...",
@@ -335,6 +416,11 @@
     "currentBalance": "Текущий баланс",
     "activeUntil": "Активна до",
     "noActiveSubscription": "Нет активной подписки",
+    "linkAccountBanner": {
+      "title": "Добавьте способ входа",
+      "subtitle": "Сейчас доступен только один способ входа. Привяжите email или Telegram, чтобы не потерять доступ к аккаунту.",
+      "cta": "Привязать аккаунт"
+    },
     "devicesUsed": "Устройств: {{used}} из {{total}}",
     "trafficUsed": "Трафик: {{used}} из {{total}} ГБ",
     "unlimitedTraffic": "Безлимитный трафик",
@@ -1160,6 +1246,7 @@
       }
     },
     "transactionHistory": "История операций",
+    "showAll": "Показать все",
     "noTransactions": "Нет операций",
     "date": "Дата",
     "type": "Тип",
@@ -3452,6 +3539,10 @@
       "users": "Пользователи",
       "logoAndName": "Логотип и название",
       "projectName": "Название проекта",
+      "projectNameColorTitle": "Цвет части названия",
+      "projectNameColorDesc": "Поставьте метку {#HEX} перед словом — оно окрасится в этот цвет (#RGB или #RRGGBB). Цвет действует до пробела или следующей метки. В заголовке вкладки и ярлыке метки скрываются.",
+      "projectNameColorExample": "Пример — нажмите, чтобы подставить",
+      "projectNameColorPreview": "Так название выглядит в шапке",
       "interfaceOptions": "Опции интерфейса",
       "animatedBackground": "Анимированный фон",
       "animatedBackgroundDesc": "Волны на фоне приложения",

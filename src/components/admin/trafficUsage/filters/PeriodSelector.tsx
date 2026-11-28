@@ -11,6 +11,7 @@ import { DateField } from '../../../DateField';
 // the same canonical list.
 // ──────────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const PERIODS = [1, 3, 7, 14, 30] as const;
 
 export function PeriodSelector({

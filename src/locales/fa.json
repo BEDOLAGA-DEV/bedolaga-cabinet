@@ -1,4 +1,77 @@
 {
+  "home": {
+    "status": {
+      "none": "بدون اشتراک",
+      "trial": "دوره آزمایشی",
+      "active": "فعال",
+      "expiring": "به‌زودی تمام می‌شود",
+      "limited": "ترافیک تمام شد",
+      "expired": "تمام شده"
+    },
+    "big": {
+      "days_one": "{{count}} روز",
+      "days_other": "{{count}} روز",
+      "hours_one": "{{count}} ساعت",
+      "hours_other": "{{count}} ساعت",
+      "trialDays_one": "{{count}} روز رایگان",
+      "trialDays_other": "{{count}} روز رایگان",
+      "noSub": "اشتراکی ندارید",
+      "paused": "متوقف",
+      "trafficOut": "سقف تمام شد"
+    },
+    "sub": {
+      "until": "تا {{date}}",
+      "autopayOn": "پرداخت خودکار فعال است",
+      "endedOn": "در {{date}} تمام شد.",
+      "devicesKept_one": "{{count}} دستگاه شما ذخیره شده و پس از تمدید دوباره کار می‌کند.",
+      "devicesKept_other": "{{count}} دستگاه شما ذخیره شده و پس از تمدید دوباره کار می‌کنند.",
+      "limited": "اشتراک تا {{date}} معتبر است. برای ادامه، تعرفه را تغییر دهید.",
+      "trialOffer": "دسترسی کامل در دوره آزمایشی. کارت لازم نیست.",
+      "noSub": "برای اتصال یک تعرفه انتخاب کنید."
+    },
+    "action": {
+      "connect": "اتصال دستگاه",
+      "renew": "تمدید",
+      "switchTariff": "تغییر تعرفه",
+      "autopay": "پرداخت خودکار",
+      "buyTariff": "خرید تعرفه",
+      "plans": "تعرفه‌ها",
+      "tryFree": "امتحان رایگان",
+      "activating": "در حال فعال‌سازی…"
+    },
+    "tile": {
+      "devices": "دستگاه‌ها",
+      "devicesOf": "{{used}} از {{limit}}",
+      "devicesUnlimited": "بدون محدودیت",
+      "addDevice": "افزودن دستگاه",
+      "traffic": "ترافیک",
+      "trafficLimit": "از {{limit}}",
+      "trafficUnlimited": "نامحدود",
+      "balance": "موجودی",
+      "topUp": "افزایش موجودی",
+      "friends": "دوستان",
+      "invite": "دعوت",
+      "earned": "+{{amount}} درآمد"
+    },
+    "steps": {
+      "title": "نحوه اتصال",
+      "trial": "دوره آزمایشی را فعال کنید",
+      "plan": "یک تعرفه انتخاب کنید",
+      "app": "برنامه را نصب کنید",
+      "connect": "روی «اتصال» بزنید"
+    }
+  },
+  "deviceCards": {
+    "countOf": "{{used}} از {{limit}}",
+    "countUnlimited": "{{count}} · نامحدود",
+    "added": "افزوده شده در {{date}}",
+    "connectFirst": "اتصال اولین دستگاه",
+    "connectMore": "اتصال دستگاه",
+    "freeSlots": "جای خالی: {{count}}",
+    "freeUnlimited": "بدون محدودیت تعداد دستگاه",
+    "limitReached": "همه جاها پر است. برای اتصال دستگاه جدید، یک دستگاه قدیمی را حذف کنید.",
+    "deleteAll": "حذف همه ({{count}})"
+  },
   "common": {
     "loading": "در حال بارگذاری...",
     "all": "همه",
@@ -318,6 +391,11 @@
     "currentBalance": "موجودی فعلی",
     "activeUntil": "فعال تا",
     "noActiveSubscription": "اشتراک فعال ندارید",
+    "linkAccountBanner": {
+      "title": "یک روش ورود اضافه کنید",
+      "subtitle": "در حال حاضر فقط یک روش ورود دارید. ایمیل یا تلگرام را متصل کنید تا دسترسی به حساب خود را از دست ندهید.",
+      "cta": "اتصال حساب"
+    },
     "devicesUsed": "دستگاه‌ها: {{used}} از {{total}}",
     "trafficUsed": "ترافیک: {{used}} از {{total}} گیگ",
     "unlimitedTraffic": "ترافیک نامحدود",
@@ -1125,6 +1203,7 @@
       }
     },
     "transactionHistory": "تاریخچه تراکنش‌ها",
+    "showAll": "نمایش همه",
     "noTransactions": "تراکنشی موجود نیست",
     "date": "تاریخ",
     "type": "نوع",
@@ -2563,6 +2642,10 @@
       "logoAndName": "لوگو و نام",
       "notSpecified": "مشخص نشده",
       "projectName": "نام پروژه",
+      "projectNameColorTitle": "رنگی کردن بخشی از نام",
+      "projectNameColorDesc": "پیش از یک کلمه نشانگر {#HEX} بگذارید تا رنگی شود (#RGB یا #RRGGBB). رنگ تا فاصله یا نشانگر بعدی ادامه دارد. در عنوان تب و میان‌بر صفحهٔ اصلی نشانگرها نمایش داده نمی‌شوند.",
+      "projectNameColorExample": "نمونه — برای استفاده کلیک کنید",
+      "projectNameColorPreview": "نمایش نام در هدر",
       "quickPresets": "پیش‌تنظیم‌های سریع",
       "resetAllColors": "بازنشانی همه رنگ‌ها",
       "statusColors": "رنگ‌های وضعیت",

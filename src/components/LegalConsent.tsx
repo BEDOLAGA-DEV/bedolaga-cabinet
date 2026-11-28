@@ -2,12 +2,12 @@ import { useTranslation } from 'react-i18next';
 
 // Галочки «ознакомлен» для НОВОГО пользователя. Набор документов приходит с бэка
 // (GET /cabinet/info/legal-consent) — там же решается, включён ли гейт вообще и
-// какие документы реально заполнены. Здесь только отрисовка и ссылки: адреса
-// публичных страниц знает фронт, бэк отдаёт лишь ключи.
-
+// какие документы реально заполнены. Здесь только отрисовка; ссылки — те же
+// брендовые адреса berlin-connection.ru, что и в футере Login.tsx, а не
+// заполняемые в админке /offer и /privacy.
 export const LEGAL_DOCUMENT_LINKS: Record<string, string> = {
-  public_offer: '/offer',
-  privacy_policy: '/privacy',
+  public_offer: 'https://berlin-connection.ru/docs/#agreement',
+  privacy_policy: 'https://berlin-connection.ru/docs/#policy',
 };
 
 const LEGAL_DOCUMENT_LABELS: Record<string, { key: string; fallback: string }> = {

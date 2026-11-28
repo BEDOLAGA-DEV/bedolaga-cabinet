@@ -36,12 +36,13 @@ import { resolveConnectionUrlForUi } from '../utils/connectionLink';
 import { getFlagEmoji } from '../utils/subscriptionHelpers';
 import Twemoji from '@/lib/twemoji';
 import { AutopayToggle } from '../components/subscription/manage/AutopayToggle';
+import FocusAnchor from '../components/FocusAnchor';
 import { DailyPausePanel } from '../components/subscription/manage/DailyPausePanel';
 import {
   canReissueLink,
   ReissueLinkButton,
 } from '../components/subscription/manage/ReissueLinkButton';
-import { DevicesPanel } from '../components/subscription/manage/DevicesPanel';
+import { DeviceCards as DevicesPanel } from '../components/subscription/manage/DeviceCards';
 import { RecurringPanels } from '../components/subscription/manage/RecurringPanels';
 import { DeviceTopupSheet } from '../components/subscription/sheets/DeviceTopupSheet';
 import { DeviceReductionSheet } from '../components/subscription/sheets/DeviceReductionSheet';
@@ -952,13 +953,15 @@ export default function Subscription() {
               )}
 
               {/* ─── Autopay Toggle ─── */}
-              <AutopayToggle
-                subscription={subscription}
-                subscriptionId={subscriptionId}
-                accentColor={zone.mainHex}
-                offColor={g.textGhost}
-                surface={{ background: g.innerBg, border: g.innerBorder }}
-              />
+              <FocusAnchor id="autopay">
+                <AutopayToggle
+                  subscription={subscription}
+                  subscriptionId={subscriptionId}
+                  accentColor={zone.mainHex}
+                  offColor={g.textGhost}
+                  surface={{ background: g.innerBg, border: g.innerBorder }}
+                />
+              </FocusAnchor>
 
               <RecurringPanels subscription={subscription} subscriptionId={subscriptionId} />
             </div>
@@ -1121,17 +1124,10 @@ export default function Subscription() {
 
       {/* My Devices Section */}
       {subscription && (
-        <div
-          className="relative overflow-hidden rounded-3xl"
-          style={{
-            background: g.cardBg,
-            border: `1px solid ${g.cardBorder}`,
-            boxShadow: g.shadow,
-            padding: '24px 28px',
-          }}
-        >
+        // Без внешней карточки: каждое устройство уже карточка, вложенность лишняя.
+        <FocusAnchor id="devices" className="px-1">
           <DevicesPanel subscription={subscription} subscriptionId={subscriptionId} />
-        </div>
+        </FocusAnchor>
       )}
     </div>
   );

@@ -70,6 +70,9 @@ export function MobileBottomNav({ items, isMenuOpen = false }: MobileBottomNavPr
               key={item.path}
               to={item.path}
               onClick={handleNavClick}
+              // Сюда в конце заставки садится оранжевая точка (src/intro/intro.js).
+              data-intro-nav=""
+              aria-current={isActive(item.path) ? 'page' : undefined}
               className={cn(
                 // На 360 пяти пунктам достаётся по ~64 px: при px-3 подпись
                 // «Колесо удачи» заходила на соседа. Боковых полей нет (подсветка —

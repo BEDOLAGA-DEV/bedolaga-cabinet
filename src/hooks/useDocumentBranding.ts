@@ -15,17 +15,11 @@ import {
   type ManifestIcon,
   markBrandApplied,
   setAppNameMeta,
-  setAppleTouchIcon,
   setDocumentTitle,
   setWebManifest,
   writeBrandHint,
 } from '@/utils/documentBranding';
-import {
-  letterFaviconDataUri,
-  roundedFaviconDataUri,
-  setFavicon,
-  squareIconDataUri,
-} from '@/utils/favicon';
+import { letterFaviconDataUri, roundedFaviconDataUri, squareIconDataUri } from '@/utils/favicon';
 import { readableTextOnHex } from './useThemeColors';
 import { useTheme } from './useTheme';
 
@@ -74,7 +68,10 @@ async function shortcutIcons(
     squareIconDataUri(src, APPLE_TOUCH_ICON_PX, { background }),
     ...MANIFEST_ICON_SIZES.flatMap((size) => [
       squareIconDataUri(src, size, { background }),
-      squareIconDataUri(src, size, { background, contentScale: MASKABLE_SAFE_ZONE }),
+      squareIconDataUri(src, size, {
+        background,
+        contentScale: MASKABLE_SAFE_ZONE,
+      }),
     ]),
   ]);
   const manifest = MANIFEST_ICON_SIZES.flatMap((size, index): ManifestIcon[] => {
@@ -84,7 +81,14 @@ async function shortcutIcons(
     return [
       ...(any ? [{ src: any, sizes, type: 'image/png', purpose: 'any' as const }] : []),
       ...(maskable
-        ? [{ src: maskable, sizes, type: 'image/png', purpose: 'maskable' as const }]
+        ? [
+            {
+              src: maskable,
+              sizes,
+              type: 'image/png',
+              purpose: 'maskable' as const,
+            },
+          ]
         : []),
     ];
   });
@@ -178,10 +182,9 @@ export function useDocumentBranding(): void {
     buildBrandIcons(branding, letter, accent, background)
       .then((icons) => {
         if (cancelled) return;
-        if (icons.favicon) setFavicon(icons.favicon);
+        // Фавикон и apple-touch-icon захардкожены в index.html — не подменяем.
         // С этого момента ранний инлайн-скрипт index.html бренд не трогает.
         markBrandApplied();
-        setAppleTouchIcon(icons.touch);
         // Манифест бота из index.html (иконки по URL) не подменяем: из data: URI
         // Chrome на Android ставит ярлык вместо приложения.
         if (!hasSameOriginManifest()) {

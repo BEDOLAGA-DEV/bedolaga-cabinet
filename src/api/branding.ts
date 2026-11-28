@@ -3,11 +3,15 @@ import { isEndpointMissingError } from '../utils/api-error';
 import type { AnimationConfig } from '@/components/ui/backgrounds/types';
 import { DEFAULT_ANIMATION_CONFIG } from '@/components/ui/backgrounds/types';
 import { safeSession } from '../utils/safeStorage';
+import { stripBrandMarkup } from '../utils/brandName';
 
 export type { AnimationConfig };
 
 export interface BrandingInfo {
+  /** Чистое имя без меток цвета — для вкладки, ярлыка, manifest, alt и текстов. */
   name: string;
+  /** Имя как набрано в настройках, с метками цвета {#HEX}; для шапки и редактора. */
+  name_markup?: string;
   logo_url: string | null;
   logo_letter: string;
   has_custom_logo: boolean;
@@ -86,19 +90,30 @@ export const isLogoPreloaded = (): boolean => {
   }
 };
 
+/**
+ * Бот отдаёт имя как набрано, с метками цвета. Разводим его на `name` (чистое) и
+ * `name_markup` (с метками), чтобы метки не попали ни в заголовок вкладки, ни в
+ * ярлык. Повторный вызов безопасен: кеш прошлых сборок без `name_markup` тоже
+ * проходит через неё.
+ */
+export const normalizeBranding = (branding: BrandingInfo): BrandingInfo => {
+  const markup = branding.name_markup ?? branding.name ?? '';
+  return { ...branding, name: stripBrandMarkup(markup), name_markup: markup };
+};
+
 // Get cached branding from sessionStorage
 export const getCachedBranding = (): BrandingInfo | null => {
   try {
     const cached = sessionStorage.getItem(BRANDING_CACHE_KEY);
     if (cached) {
-      return JSON.parse(cached);
+      return normalizeBranding(JSON.parse(cached));
     }
     // One-time migration: move stale localStorage value to sessionStorage
     const legacy = localStorage.getItem(BRANDING_CACHE_KEY);
     if (legacy) {
       localStorage.removeItem(BRANDING_CACHE_KEY);
       sessionStorage.setItem(BRANDING_CACHE_KEY, legacy);
-      return JSON.parse(legacy);
+      return normalizeBranding(JSON.parse(legacy));
     }
   } catch {
     // storage not available or invalid JSON
@@ -189,13 +204,13 @@ export const brandingApi = {
   // Get current branding (public, no auth required)
   getBranding: async (): Promise<BrandingInfo> => {
     const response = await apiClient.get<BrandingInfo>('/cabinet/branding');
-    return response.data;
+    return normalizeBranding(response.data);
   },
 
   // Update project name (admin only)
   updateName: async (name: string): Promise<BrandingInfo> => {
     const response = await apiClient.put<BrandingInfo>('/cabinet/branding/name', { name });
-    return response.data;
+    return normalizeBranding(response.data);
   },
 
   // Upload custom logo (admin only)
@@ -209,7 +224,7 @@ export const brandingApi = {
       _logoBlobUrl = null;
     }
     safeSession.removeItem(LOGO_PRELOADED_KEY);
-    return response.data;
+    return normalizeBranding(response.data);
   },
 
   // ── Видео стартового меню бота ────────────────────────────────────────
@@ -243,7 +258,7 @@ export const brandingApi = {
       _logoBlobUrl = null;
     }
     safeSession.removeItem(LOGO_PRELOADED_KEY);
-    return response.data;
+    return normalizeBranding(response.data);
   },
 
   // Get logo URL as blob (hides backend URL from DOM)

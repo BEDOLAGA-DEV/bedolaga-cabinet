@@ -13,6 +13,7 @@ import { CheckIcon, XIcon, ExclamationIcon } from '@/components/icons';
 import { safeLocal, safeSession } from '../utils/safeStorage';
 import { useLegalConsentGate } from '../hooks/useLegalConsentGate';
 import LegalConsentGate from '../components/LegalConsentGate';
+import { BrandName } from '../components/BrandName';
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_COUNT_KEY = 'telegram_redirect_retry_count';
@@ -50,6 +51,7 @@ export default function TelegramRedirect() {
   });
 
   const appName = branding ? branding.name : import.meta.env.VITE_APP_NAME || 'VPN';
+  const appNameMarkup = branding ? (branding.name_markup ?? branding.name) : appName;
   const logoLetter = branding?.logo_letter || import.meta.env.VITE_APP_LOGO || 'V';
   const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null;
 
@@ -167,7 +169,9 @@ export default function TelegramRedirect() {
           )}
         </div>
 
-        <h1 className="mb-2 text-2xl font-bold text-dark-50">{appName}</h1>
+        <h1 className="mb-2 text-2xl font-bold text-dark-50">
+          <BrandName markup={appNameMarkup} />
+        </h1>
 
         {/* Loading State */}
         {status === 'loading' && (

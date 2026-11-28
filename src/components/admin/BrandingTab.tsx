@@ -6,7 +6,11 @@ import { setCachedFullscreenEnabled } from '../../hooks/useTelegramSDK';
 import { LITE_MODE_QUERY_KEY, writeLiteModeHint } from '../../hooks/useLiteMode';
 import { UploadIcon, TrashIcon, PencilIcon, CheckIcon, CloseIcon } from './icons';
 import { Toggle } from './Toggle';
+import { BrandName } from '../BrandName';
 import { BackgroundEditor } from './BackgroundEditor';
+
+/** Пример для подсказки: «connection» оранжевым, как в логотипе. */
+const BRAND_NAME_EXAMPLE = 'berlin{#FF8A00}connection';
 
 interface BrandingTabProps {
   accentColor?: string;
@@ -216,36 +220,70 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
               {t('admin.settings.projectName')}
             </label>
             {editingName ? (
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  className="min-w-0 flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
-                  maxLength={50}
-                />
-                <button
-                  onClick={() => updateBrandingMutation.mutate(newName)}
-                  disabled={updateBrandingMutation.isPending}
-                  className="shrink-0 rounded-xl bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
-                >
-                  <CheckIcon />
-                </button>
-                <button
-                  onClick={() => setEditingName(false)}
-                  className="shrink-0 rounded-xl bg-dark-700 px-4 py-2 text-dark-300 transition-colors hover:bg-dark-600"
-                >
-                  <CloseIcon />
-                </button>
-              </div>
+              <>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    className="min-w-0 flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
+                    maxLength={50}
+                  />
+                  <button
+                    onClick={() => updateBrandingMutation.mutate(newName)}
+                    disabled={updateBrandingMutation.isPending}
+                    className="shrink-0 rounded-xl bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
+                  >
+                    <CheckIcon />
+                  </button>
+                  <button
+                    onClick={() => setEditingName(false)}
+                    className="shrink-0 rounded-xl bg-dark-700 px-4 py-2 text-dark-300 transition-colors hover:bg-dark-600"
+                  >
+                    <CloseIcon />
+                  </button>
+                </div>
+                <div className="mt-3 space-y-2 rounded-xl border border-dark-700/60 bg-dark-900/40 p-3 text-xs text-dark-400">
+                  <p className="font-medium text-dark-200">
+                    {t('admin.settings.projectNameColorTitle')}
+                  </p>
+                  <p>{t('admin.settings.projectNameColorDesc')}</p>
+                  <div>
+                    <p className="mb-1 text-dark-500">
+                      {t('admin.settings.projectNameColorExample')}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setNewName(BRAND_NAME_EXAMPLE)}
+                      className="rounded-lg bg-dark-800 px-2 py-1 font-mono text-dark-200 transition-colors hover:bg-dark-700"
+                    >
+                      {BRAND_NAME_EXAMPLE}
+                    </button>
+                  </div>
+                  {newName.trim() && (
+                    <div>
+                      <p className="mb-1 text-dark-500">
+                        {t('admin.settings.projectNameColorPreview')}
+                      </p>
+                      <span className="text-base font-semibold text-dark-100">
+                        <BrandName markup={newName} />
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </>
             ) : (
               <div className="flex min-w-0 items-center gap-2">
                 <span className="min-w-0 truncate text-lg text-dark-100">
-                  {branding?.name || t('admin.settings.notSpecified')}
+                  {branding?.name ? (
+                    <BrandName markup={branding.name_markup ?? branding.name} />
+                  ) : (
+                    t('admin.settings.notSpecified')
+                  )}
                 </span>
                 <button
                   onClick={() => {
-                    setNewName(branding?.name ?? '');
+                    setNewName(branding?.name_markup ?? branding?.name ?? '');
                     setEditingName(true);
                   }}
                   className="shrink-0 rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"

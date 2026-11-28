@@ -33,6 +33,7 @@ export function useBranding() {
   });
 
   const appName = branding ? branding.name : FALLBACK_NAME;
+  const appNameMarkup = branding ? (branding.name_markup ?? branding.name) : FALLBACK_NAME;
   const logoLetter = branding?.logo_letter || FALLBACK_LOGO;
   const hasCustomLogo = branding?.has_custom_logo || false;
   const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null;
@@ -59,6 +60,7 @@ export function useBranding() {
 
   return {
     appName,
+    appNameMarkup,
     logoLetter,
     hasCustomLogo,
     logoUrl,

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import packageJson from './package.json' with { type: 'json' };
 import { brandingHtml } from './vite-plugins/brandingHtml.ts';
+import { introInline } from './vite-plugins/introInline.ts';
 
 // Vendor-чанки: [имя, какие модули в него идут]. Порядок = приоритет группы.
 // Rolldown по умолчанию забирает в группу и все зависимости её модулей, поэтому
@@ -38,6 +39,8 @@ export default defineConfig(({ mode }) => {
   // Переменные из .env и из окружения сборки (Docker передаёт их через ENV);
   // окружение сильнее файла — как и у самого Vite.
   const env = { ...loadEnv(mode, import.meta.dirname, 'VITE_'), ...process.env };
+  const proxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:8080';
+
   return {
     plugins: [
       react(),
@@ -45,6 +48,7 @@ export default defineConfig(({ mode }) => {
         name: env.VITE_APP_NAME ?? '',
         apiUrl: env.VITE_API_URL ?? '',
       }),
+      introInline(path.resolve(import.meta.dirname, 'src/intro/intro.js')),
     ],
     define: {
       __APP_VERSION__: JSON.stringify(packageJson.version),
@@ -62,7 +66,7 @@ export default defineConfig(({ mode }) => {
       host: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:8080',
+          target: proxyTarget,
           changeOrigin: true,
           // Strip /api prefix: /api/cabinet/auth -> /cabinet/auth
           rewrite: (path) => path.replace(/^\/api/, ''),
@@ -71,7 +75,7 @@ export default defineConfig(({ mode }) => {
         // /api). Proxy it too so the "service unavailable" detection probe hits the
         // real backend in dev instead of the Vite server (which would mask outages).
         '/health': {
-          target: 'http://localhost:8080',
+          target: proxyTarget,
           changeOrigin: true,
         },
       },
